@@ -91,9 +91,6 @@ WarpX::EvolveEM (int numsteps)
             // Particles have p^{n-1/2} and x^{n}.
             FillBoundaryE();
             FillBoundaryB();
-            UpdateAuxilaryData();
-
-        }
 
     int mlev = 0;
 
@@ -103,12 +100,14 @@ WarpX::EvolveEM (int numsteps)
     if (Efield_fp [mlev][0].get()) NullifyMF(*Efield_fp [mlev][0], mlev, -1.e100, 1.e100,  4. );
     if (Efield_fp [mlev][1].get()) NullifyMF(*Efield_fp [mlev][1], mlev, -1.e100, 1.e100,  5. );
     if (Efield_fp [mlev][2].get()) NullifyMF(*Efield_fp [mlev][2], mlev, -1.e100, 1.e100,  6. );
+/*
     if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  7. );
     if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  8. );
     if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  9. );
     if (Efield_cax[mlev][0].get()) NullifyMF(*Efield_cax[mlev][0], mlev, -1.e100, 1.e100, 10. );
     if (Efield_cax[mlev][1].get()) NullifyMF(*Efield_cax[mlev][1], mlev, -1.e100, 1.e100, 11. );
     if (Efield_cax[mlev][2].get()) NullifyMF(*Efield_cax[mlev][2], mlev, -1.e100, 1.e100, 12. );
+*/
 
     if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  1. );
     if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  2. );
@@ -116,13 +115,14 @@ WarpX::EvolveEM (int numsteps)
     if (Bfield_fp [mlev][0].get()) NullifyMF(*Bfield_fp [mlev][0], mlev, -1.e100, 1.e100,  4. );
     if (Bfield_fp [mlev][1].get()) NullifyMF(*Bfield_fp [mlev][1], mlev, -1.e100, 1.e100,  5. );
     if (Bfield_fp [mlev][2].get()) NullifyMF(*Bfield_fp [mlev][2], mlev, -1.e100, 1.e100,  6. );
+/*
     if (Bfield_aux[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  7. );
     if (Bfield_aux[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  8. );
     if (Bfield_aux[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  9. );
     if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_cax[mlev][0], mlev, -1.e100, 1.e100,  10. );
     if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_cax[mlev][1], mlev, -1.e100, 1.e100,  11. );
     if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_cax[mlev][2], mlev, -1.e100, 1.e100,  12. );
-
+*/
     mlev = 1;
 
     if (Efield_cp [mlev][0].get()) NullifyMF(*Efield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
@@ -131,12 +131,14 @@ WarpX::EvolveEM (int numsteps)
     if (Efield_fp [mlev][0].get()) NullifyMF(*Efield_fp [mlev][0], mlev, -1.e100, 1.e100,  24. );
     if (Efield_fp [mlev][1].get()) NullifyMF(*Efield_fp [mlev][1], mlev, -1.e100, 1.e100,  25. );
     if (Efield_fp [mlev][2].get()) NullifyMF(*Efield_fp [mlev][2], mlev, -1.e100, 1.e100,  26. );
+/*
     if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
     if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
     if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
     if (Efield_cax[mlev][0].get()) NullifyMF(*Efield_cax[mlev][0], mlev, -1.e100, 1.e100,  30. );
     if (Efield_cax[mlev][1].get()) NullifyMF(*Efield_cax[mlev][1], mlev, -1.e100, 1.e100,  31. );
     if (Efield_cax[mlev][2].get()) NullifyMF(*Efield_cax[mlev][2], mlev, -1.e100, 1.e100,  32. );
+*/
 
     if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
     if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  22. );
@@ -144,12 +146,19 @@ WarpX::EvolveEM (int numsteps)
     if (Bfield_fp [mlev][0].get()) NullifyMF(*Bfield_fp [mlev][0], mlev, -1.e100, 1.e100,  24. );
     if (Bfield_fp [mlev][1].get()) NullifyMF(*Bfield_fp [mlev][1], mlev, -1.e100, 1.e100,  25. );
     if (Bfield_fp [mlev][2].get()) NullifyMF(*Bfield_fp [mlev][2], mlev, -1.e100, 1.e100,  26. );
+/*
     if (Bfield_aux[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
     if (Bfield_aux[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
     if (Bfield_aux[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
     if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_cax[mlev][0], mlev, -1.e100, 1.e100,  30. );
     if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_cax[mlev][1], mlev, -1.e100, 1.e100,  31. );
     if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_cax[mlev][2], mlev, -1.e100, 1.e100,  32. );
+*/
+
+            UpdateAuxilaryData();
+
+        }
+
 
         if (do_subcycling == 0 || finest_level == 0) {
             OneStep_nosub(cur_time);
