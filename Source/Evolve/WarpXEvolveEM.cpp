@@ -95,6 +95,51 @@ WarpX::EvolveEM (int numsteps)
 
         }
 
+    int mlev = 0;
+    if (Efield_cp [mlev][0].get()) NullifyMF(*Efield_cp [mlev][0], mlev, -1.e100, 1.e100,  1. );
+    if (Efield_cp [mlev][1].get()) NullifyMF(*Efield_cp [mlev][1], mlev, -1.e100, 1.e100,  2. );
+    if (Efield_cp [mlev][2].get()) NullifyMF(*Efield_cp [mlev][2], mlev, -1.e100, 1.e100,  3. );
+    if (Efield_fp [mlev][0].get()) NullifyMF(*Efield_fp [mlev][0], mlev, -1.e100, 1.e100,  4. );
+    if (Efield_fp [mlev][1].get()) NullifyMF(*Efield_fp [mlev][1], mlev, -1.e100, 1.e100,  5. );
+    if (Efield_fp [mlev][2].get()) NullifyMF(*Efield_fp [mlev][2], mlev, -1.e100, 1.e100,  6. );
+    if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  7. );
+    if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  8. );
+    if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  9. );
+    if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  1. );
+    if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  2. );
+    if (Bfield_cp [mlev][2].get()) NullifyMF(*Bfield_cp [mlev][2], mlev, -1.e100, 1.e100,  3. );
+    if (Bfield_fp [mlev][0].get()) NullifyMF(*Bfield_fp [mlev][0], mlev, -1.e100, 1.e100,  4. );
+    if (Bfield_fp [mlev][1].get()) NullifyMF(*Bfield_fp [mlev][1], mlev, -1.e100, 1.e100,  5. );
+    if (Bfield_fp [mlev][2].get()) NullifyMF(*Bfield_fp [mlev][2], mlev, -1.e100, 1.e100,  6. );
+    if (Bfield_aux[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  7. );
+    if (Bfield_aux[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  8. );
+    if (Bfield_aux[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  9. );
+    if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_cax[mlev][0], mlev, -1.e100, 1.e100,  10. );
+    if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_cax[mlev][1], mlev, -1.e100, 1.e100,  11. );
+    if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_cax[mlev][2], mlev, -1.e100, 1.e100,  12. );
+    mlev = 1;
+    if (Efield_cp [mlev][0].get()) NullifyMF(*Efield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
+    if (Efield_cp [mlev][1].get()) NullifyMF(*Efield_cp [mlev][1], mlev, -1.e100, 1.e100,  22. );
+    if (Efield_cp [mlev][2].get()) NullifyMF(*Efield_cp [mlev][2], mlev, -1.e100, 1.e100,  23. );
+    if (Efield_fp [mlev][0].get()) NullifyMF(*Efield_fp [mlev][0], mlev, -1.e100, 1.e100,  24. );
+    if (Efield_fp [mlev][1].get()) NullifyMF(*Efield_fp [mlev][1], mlev, -1.e100, 1.e100,  25. );
+    if (Efield_fp [mlev][2].get()) NullifyMF(*Efield_fp [mlev][2], mlev, -1.e100, 1.e100,  26. );
+    if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
+    if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
+    if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
+    if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
+    if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  22. );
+    if (Bfield_cp [mlev][2].get()) NullifyMF(*Bfield_cp [mlev][2], mlev, -1.e100, 1.e100,  23. );
+    if (Bfield_fp [mlev][0].get()) NullifyMF(*Bfield_fp [mlev][0], mlev, -1.e100, 1.e100,  24. );
+    if (Bfield_fp [mlev][1].get()) NullifyMF(*Bfield_fp [mlev][1], mlev, -1.e100, 1.e100,  25. );
+    if (Bfield_fp [mlev][2].get()) NullifyMF(*Bfield_fp [mlev][2], mlev, -1.e100, 1.e100,  26. );
+    if (Bfield_aux[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
+    if (Bfield_aux[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
+    if (Bfield_aux[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
+    if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  30. );
+    if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  31. );
+    if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  32. );
+
         if (do_subcycling == 0 || finest_level == 0) {
             OneStep_nosub(cur_time);
         } else if (do_subcycling == 1 && finest_level == 1) {
@@ -189,11 +234,13 @@ WarpX::EvolveEM (int numsteps)
             FillBoundaryB();
             UpdateAuxilaryData();
 
+            /*
             for (int lev = 0; lev <= finest_level; ++lev) {
                 mypc->FieldGather(lev,
                                   *Efield_aux[lev][0],*Efield_aux[lev][1],*Efield_aux[lev][2],
                                   *Bfield_aux[lev][0],*Bfield_aux[lev][1],*Bfield_aux[lev][2]);
             }
+            */
 
             last_plot_file_step = step+1;
             last_insitu_step = step+1;
@@ -240,7 +287,8 @@ WarpX::EvolveEM (int numsteps)
         FillBoundaryE();
         FillBoundaryB();
         UpdateAuxilaryData();
-
+        
+        /*
         for (int lev = 0; lev <= finest_level; ++lev) {
             mypc->FieldGather(lev,
                               *Efield_aux[lev][0],*Efield_aux[lev][1],
@@ -248,6 +296,7 @@ WarpX::EvolveEM (int numsteps)
                               *Bfield_aux[lev][0],*Bfield_aux[lev][1],
                               *Bfield_aux[lev][2]);
         }
+        */
 
         if (write_plot_file)
             WritePlotFile();
@@ -642,12 +691,12 @@ WarpX::applyMirrors(Real time){
             MultiFab& By = *Bfield_fp[lev][1].get();
             MultiFab& Bz = *Bfield_fp[lev][2].get();
             // Set each field to zero between z_min and z_max
-            NullifyMF(Ex, lev, z_min, z_max);
-            NullifyMF(Ey, lev, z_min, z_max);
-            NullifyMF(Ez, lev, z_min, z_max);
-            NullifyMF(Bx, lev, z_min, z_max);
-            NullifyMF(By, lev, z_min, z_max);
-            NullifyMF(Bz, lev, z_min, z_max);
+            NullifyMF(Ex, lev, z_min, z_max, 0.);
+            NullifyMF(Ey, lev, z_min, z_max, 0.);
+            NullifyMF(Ez, lev, z_min, z_max, 0.);
+            NullifyMF(Bx, lev, z_min, z_max, 0.);
+            NullifyMF(By, lev, z_min, z_max, 0.);
+            NullifyMF(Bz, lev, z_min, z_max, 0.);
             if (lev>0){
                 // Get coarse patch field MultiFabs
                 MultiFab& cEx = *Efield_cp[lev][0].get();
@@ -657,12 +706,12 @@ WarpX::applyMirrors(Real time){
                 MultiFab& cBy = *Bfield_cp[lev][1].get();
                 MultiFab& cBz = *Bfield_cp[lev][2].get();
                 // Set each field to zero between z_min and z_max
-                NullifyMF(cEx, lev, z_min, z_max);
-                NullifyMF(cEy, lev, z_min, z_max);
-                NullifyMF(cEz, lev, z_min, z_max);
-                NullifyMF(cBx, lev, z_min, z_max);
-                NullifyMF(cBy, lev, z_min, z_max);
-                NullifyMF(cBz, lev, z_min, z_max);
+                NullifyMF(cEx, lev, z_min, z_max, 0.);
+                NullifyMF(cEy, lev, z_min, z_max, 0.);
+                NullifyMF(cEz, lev, z_min, z_max, 0.);
+                NullifyMF(cBx, lev, z_min, z_max, 0.);
+                NullifyMF(cBy, lev, z_min, z_max, 0.);
+                NullifyMF(cBz, lev, z_min, z_max, 0.);
             }
         }
     }

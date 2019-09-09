@@ -8,6 +8,7 @@
 #include <WarpXWrappers.h>
 #include <IonizationEnergiesTable.H>
 #include <FieldGather.H>
+#include <WarpXUtil.H>
 
 #include <WarpXAlgorithmSelection.H>
 
@@ -1324,7 +1325,6 @@ PhysicalParticleContainer::Evolve (int lev,
                                    np_current, np-np_current, thread_num,
                                    lev, lev-1, dt);
                 }
-
 
                 //
                 // copy particle data back

@@ -116,16 +116,17 @@ void ConvertLabParamsToBoost()
 /* \brief Function that sets the value of MultiFab MF to zero for z between 
  * zmin and zmax.
  */
-void NullifyMF(amrex::MultiFab& mf, int lev, amrex::Real zmin, amrex::Real zmax){
+void NullifyMF(MultiFab& mf, int lev, Real zmin, Real zmax, Real val){
     BL_PROFILE("WarpX::NullifyMF()");
 #ifdef _OPENMP
 #pragma omp parallel if (Gpu::notInLaunchRegion())
 #endif
-    for(amrex::MFIter mfi(mf, amrex::TilingIfNotGPU()); mfi.isValid(); ++mfi){
-        const amrex::Box& bx = mfi.tilebox();
+    for(MFIter mfi(mf, TilingIfNotGPU()); mfi.isValid(); ++mfi){
+        // const Box& bx = mfi.tilebox();
+        const Box& bx = mfi.growntilebox();
         // Get box lower and upper physical z bound, and dz
-        const amrex::Real zmin_box = WarpX::LowerCorner(bx, lev)[2];
-        const amrex::Real zmax_box = WarpX::UpperCorner(bx, lev)[2];
+        const Real zmin_box = WarpX::LowerCorner(bx, lev)[2];
+        const Real zmax_box = WarpX::UpperCorner(bx, lev)[2];
         amrex::Real dz  = WarpX::CellSize(lev)[2];
         // Get box lower index in the z direction
 #if (AMREX_SPACEDIM==3)
@@ -145,7 +146,7 @@ void NullifyMF(amrex::MultiFab& mf, int lev, amrex::Real zmin, amrex::Real zmax)
                     const Real z_gridpoint = zmin_box+(j-lo_ind)*dz;
 #endif 
                     if ( (z_gridpoint >= zmin) && (z_gridpoint < zmax) ) {
-                        arr(i,j,k) = 0.;
+                        arr(i,j,k) = val;
                     };
                 }
             );
