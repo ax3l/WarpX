@@ -96,6 +96,7 @@ WarpX::EvolveEM (int numsteps)
         }
 
     int mlev = 0;
+
     if (Efield_cp [mlev][0].get()) NullifyMF(*Efield_cp [mlev][0], mlev, -1.e100, 1.e100,  1. );
     if (Efield_cp [mlev][1].get()) NullifyMF(*Efield_cp [mlev][1], mlev, -1.e100, 1.e100,  2. );
     if (Efield_cp [mlev][2].get()) NullifyMF(*Efield_cp [mlev][2], mlev, -1.e100, 1.e100,  3. );
@@ -105,6 +106,10 @@ WarpX::EvolveEM (int numsteps)
     if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  7. );
     if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  8. );
     if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  9. );
+    if (Efield_cax[mlev][0].get()) NullifyMF(*Efield_cax[mlev][0], mlev, -1.e100, 1.e100, 10. );
+    if (Efield_cax[mlev][1].get()) NullifyMF(*Efield_cax[mlev][1], mlev, -1.e100, 1.e100, 11. );
+    if (Efield_cax[mlev][2].get()) NullifyMF(*Efield_cax[mlev][2], mlev, -1.e100, 1.e100, 12. );
+
     if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  1. );
     if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  2. );
     if (Bfield_cp [mlev][2].get()) NullifyMF(*Bfield_cp [mlev][2], mlev, -1.e100, 1.e100,  3. );
@@ -117,7 +122,9 @@ WarpX::EvolveEM (int numsteps)
     if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_cax[mlev][0], mlev, -1.e100, 1.e100,  10. );
     if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_cax[mlev][1], mlev, -1.e100, 1.e100,  11. );
     if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_cax[mlev][2], mlev, -1.e100, 1.e100,  12. );
+
     mlev = 1;
+
     if (Efield_cp [mlev][0].get()) NullifyMF(*Efield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
     if (Efield_cp [mlev][1].get()) NullifyMF(*Efield_cp [mlev][1], mlev, -1.e100, 1.e100,  22. );
     if (Efield_cp [mlev][2].get()) NullifyMF(*Efield_cp [mlev][2], mlev, -1.e100, 1.e100,  23. );
@@ -127,6 +134,10 @@ WarpX::EvolveEM (int numsteps)
     if (Efield_aux[mlev][0].get()) NullifyMF(*Efield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
     if (Efield_aux[mlev][1].get()) NullifyMF(*Efield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
     if (Efield_aux[mlev][2].get()) NullifyMF(*Efield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
+    if (Efield_cax[mlev][0].get()) NullifyMF(*Efield_cax[mlev][0], mlev, -1.e100, 1.e100,  30. );
+    if (Efield_cax[mlev][1].get()) NullifyMF(*Efield_cax[mlev][1], mlev, -1.e100, 1.e100,  31. );
+    if (Efield_cax[mlev][2].get()) NullifyMF(*Efield_cax[mlev][2], mlev, -1.e100, 1.e100,  32. );
+
     if (Bfield_cp [mlev][0].get()) NullifyMF(*Bfield_cp [mlev][0], mlev, -1.e100, 1.e100,  21. );
     if (Bfield_cp [mlev][1].get()) NullifyMF(*Bfield_cp [mlev][1], mlev, -1.e100, 1.e100,  22. );
     if (Bfield_cp [mlev][2].get()) NullifyMF(*Bfield_cp [mlev][2], mlev, -1.e100, 1.e100,  23. );
@@ -136,9 +147,9 @@ WarpX::EvolveEM (int numsteps)
     if (Bfield_aux[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  27. );
     if (Bfield_aux[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  28. );
     if (Bfield_aux[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  29. );
-    if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_aux[mlev][0], mlev, -1.e100, 1.e100,  30. );
-    if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_aux[mlev][1], mlev, -1.e100, 1.e100,  31. );
-    if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_aux[mlev][2], mlev, -1.e100, 1.e100,  32. );
+    if (Bfield_cax[mlev][0].get()) NullifyMF(*Bfield_cax[mlev][0], mlev, -1.e100, 1.e100,  30. );
+    if (Bfield_cax[mlev][1].get()) NullifyMF(*Bfield_cax[mlev][1], mlev, -1.e100, 1.e100,  31. );
+    if (Bfield_cax[mlev][2].get()) NullifyMF(*Bfield_cax[mlev][2], mlev, -1.e100, 1.e100,  32. );
 
         if (do_subcycling == 0 || finest_level == 0) {
             OneStep_nosub(cur_time);
@@ -288,7 +299,7 @@ WarpX::EvolveEM (int numsteps)
         FillBoundaryB();
         UpdateAuxilaryData();
         
-        /*
+/*
         for (int lev = 0; lev <= finest_level; ++lev) {
             mypc->FieldGather(lev,
                               *Efield_aux[lev][0],*Efield_aux[lev][1],
@@ -296,7 +307,7 @@ WarpX::EvolveEM (int numsteps)
                               *Bfield_aux[lev][0],*Bfield_aux[lev][1],
                               *Bfield_aux[lev][2]);
         }
-        */
+*/
 
         if (write_plot_file)
             WritePlotFile();
@@ -360,6 +371,7 @@ WarpX::OneStep_nosub (Real cur_time)
     FillBoundaryE();
     FillBoundaryB();
 #else
+/*
     EvolveF(0.5*dt[0], DtType::FirstHalf);
     FillBoundaryF();
     EvolveB(0.5*dt[0]); // We now have B^{n+1/2}
@@ -374,6 +386,7 @@ WarpX::OneStep_nosub (Real cur_time)
         FillBoundaryE();
     }
     FillBoundaryB();
+*/
 
 #endif
 }
