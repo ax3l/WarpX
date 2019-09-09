@@ -1,23 +1,37 @@
-max_step = 1
-amr.n_cell = 16 16
-amr.max_level = 0
+max_step = 200
+amr.n_cell = 128 64
+
+amr.max_level = 1
+
+# particles.deposit_on_main_grid = electron
+
+warpx.do_subcycling = 0
+warpx.do_pml = 0
+warpx.pml_ncell = 7
+warpx.n_current_deposition_buffer = 0
+warpx.n_field_gather_buffer = 8
+
 amr.blocking_factor = 8
-amr.max_grid_size = 8
+amr.max_grid_size = 256
 amr.plot_int = 1
 geometry.coord_sys   = 0
 geometry.is_periodic = 0 0
-geometry.prob_lo     = -8 -12
-geometry.prob_hi     =  8  12
-warpx.do_pml = 0
-algo.charge_deposition = standard
-algo.field_gathering = standard
+
+algo.maxwell_fdtd_solver = ckc
+
+geometry.prob_lo  =   0  0
+geometry.prob_hi  = 128 64
+warpx.fine_tag_lo =  32 32
+warpx.fine_tag_hi =  64 64
+
 warpx.cfl = 1.0
 
 particles.nspecies = 1
 particles.species_names = electron
+
 electron.charge = -q_e
-electron.mass = m_e
+electron.mass = 1.
 electron.injection_style = "SingleParticle"
-electron.single_particle_pos = 0.0   0.0 0.0
-electron.single_particle_vel = 1.e20 0.0 0.0  # gamma*beta
+electron.single_particle_pos = 1.5 0. 45.
+electron.single_particle_vel = 1.e20 0. 0.  # gamma*beta
 electron.single_particle_weight = 1.0
