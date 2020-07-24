@@ -32,7 +32,6 @@ struct SmartCreate
 {
     const InitializationPolicy* m_policy_real;
     const InitializationPolicy* m_policy_int;
-    const int m_weight_index;
 
     template <typename PartData>
     AMREX_GPU_HOST_DEVICE AMREX_FORCE_INLINE
