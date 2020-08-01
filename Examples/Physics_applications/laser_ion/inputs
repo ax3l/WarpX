@@ -3,28 +3,24 @@
 #
 
 # time-scale with highly kinetic dynamics
-stop_time = 0.2e-12            # [s]
+stop_time = 0.15e-12           # [s]
 # time-scale for converged ion energy
 #   notes: - effective acc. time depends on laser pulse
 #          - ions will start to leave the box
 #stop_time = 1.0e-12           # [s]
 
-# quick tests at ultra-low res. (CI)
-#amr.n_cell = 352 480
+# quick tests at ultra-low res.
+#amr.n_cell = 256 480
 
-# proper resolution for 10 n_c excl. acc. length
-# (>=1x V100)
-amr.n_cell = 2720 3680
-
-# proper resolution for 30 n_c (dx<=3.33nm) incl. acc. length
-# (>=6x V100)
-#amr.n_cell = 7488 14720
+# quite coarse resolution
+# (>=16x 6xV100) ~4,000 steps for 150fs
+amr.n_cell = 1920 1920
 
 # simulation box, no MR
 #   note: increase z (space & cells) for converging ion energy
 amr.max_level = 0
-geometry.prob_lo = -7.5e-6 -5.e-6
-geometry.prob_hi =  7.5e-6 25.e-6
+geometry.prob_lo = -15.0e-6 -10.e-6
+geometry.prob_hi =  15.0e-6  20.e-6
 geometry.is_periodic = 0 0 0  # non-periodic (default)
 
 # macro-particle shape
@@ -45,7 +41,7 @@ amr.blocking_factor = 32
 warpx.do_dynamic_scheduling = 0
 
 # load balancing
-warpx.load_balance_int = 100
+#warpx.load_balance_int = 100
 #warpx.load_balance_with_sfc = 0
 #warpx.load_balance_efficiency_ratio_threshold = 1.1
 #algo.load_balance_costs_update = Timers
@@ -65,7 +61,7 @@ particles.species_names = electrons hydrogen
 # particle species
 hydrogen.species_type = hydrogen
 hydrogen.injection_style = NUniformPerCell
-hydrogen.num_particles_per_cell_each_dim = 2 2 4
+hydrogen.num_particles_per_cell_each_dim = 30 30
 hydrogen.momentum_distribution_type = constant
 hydrogen.ux = 0.0
 hydrogen.uy = 0.0
@@ -76,7 +72,7 @@ hydrogen.profile = parse_density_function
 
 electrons.species_type = electron
 electrons.injection_style = NUniformPerCell
-electrons.num_particles_per_cell_each_dim = 2 2 4
+electrons.num_particles_per_cell_each_dim = 30 30
 electrons.momentum_distribution_type = "gaussian"
 electrons.ux_th = .01
 electrons.uz_th = .01
@@ -106,7 +102,8 @@ electrons.profile = parse_density_function
 # number density: "fully ionized" electron density as reference
 #   [material 1] cryogenic H2
 my_constants.nc    = 1.742e27  # [m^-3]  1.11485e21 * 1.e6 / 0.8**2
-my_constants.n0    = 30.0      # [n_c]
+#my_constants.n0    = 30.0      # [n_c]
+my_constants.n0    = 5.0      # [n_c] lowered
 #   [material 2] liquid crystal
 #my_constants.n0    = 192
 #   [material 3] PMMA
@@ -118,7 +115,7 @@ my_constants.n0    = 30.0      # [n_c]
 my_constants.L    = 0.05e-6      # [1/m] scale length (>0)
 my_constants.Lcut = 2.0e-6       # [1/m] hard cutoff from surface
 #   core: flat foil, cylinder or sphere
-my_constants.r0 = 2.5e-6        # [m] radius or half-thickness
+my_constants.r0 = 5.0e-6        # [m] radius or half-thickness
 my_constants.x0 = 0.0           # [m]
 my_constants.y0 = 0.0           # [m]
 my_constants.z0 = 0.0           # [m]
@@ -152,16 +149,16 @@ hydrogen.density_function(x,y,z) = "nc*n0*(
 # Laser Pulse Profile
 #
 lasers.names        = laser1
-laser1.position     = 0. 0. -4.0e-6     # point the laser plane (antenna)
+laser1.position     = 0. 0. -9.0e-6     # point the laser plane (antenna)
 laser1.direction    = 0. 0. 1.          # the plane's (antenna's) normal direction
 laser1.polarization = 1. 0. 0.          # the main polarization vector
-laser1.e_max        = 64.e12            # maximum amplitude of the laser field [V/m]
+laser1.e_max        = 10.e13            # maximum amplitude of the laser field [V/m]
 laser1.wavelength   = 0.8e-6            # central wavelength of the laser pulse [m]
 laser1.profile      = Gaussian
 laser1.profile_waist = 4.e-6            # beam waist (E(w_0)=E_0/e) [m]
-laser1.profile_duration = 30.e-15       # pulse length (E(tau)=E_0/e; tau=tau_E=FWHM_I/1.17741) [s]
-laser1.profile_t_peak = 50.e-15         # time until peak intensity reached at the laser plane [s]
-laser1.profile_focal_distance = 4.0e-6  # focal distance from the antenna [m]
+laser1.profile_duration = 10.e-15       # pulse length (E(tau)=E_0/e; tau=tau_E=FWHM_I/1.17741) [s]
+laser1.profile_t_peak = 15.e-15         # time until peak intensity reached at the laser plane [s]
+laser1.profile_focal_distance = 9.0e-6  # focal distance from the antenna [m]
 
 # E_0 = a_0 * 3.211e12 / lambda_0[mu]
 #   a_0 = 16, lambda_0 = 0.8mu -> E_0 = 64.22 TV/m
@@ -170,17 +167,17 @@ laser1.profile_focal_distance = 4.0e-6  # focal distance from the antenna [m]
 #################################
 # Diagnostics
 #
-diagnostics.diags_names = diag1 openPMDh5
+#diagnostics.diags_names = openPMDh5
 
-diag1.period = 100
-diag1.diag_type = Full
-diag1.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz rho
+#diag1.period = 100
+#diag1.diag_type = Full
+#diag1.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz rho
 
-openPMDh5.period = 100
-openPMDh5.diag_type = Full
-openPMDh5.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz rho
-openPMDh5.format = openpmd
-openPMDh5.openpmd_backend = h5
+#openPMDh5.period = 20
+#openPMDh5.diag_type = Full
+#openPMDh5.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz rho
+#openPMDh5.format = openpmd
+#openPMDh5.openpmd_backend = h5
 
 
 #################################
