@@ -944,7 +944,7 @@ PhysicalParticleContainer::AddPlasma (int lev, RealBox part_realbox)
                   //  pos.x = xb;
                   //  pos.y = yb;
                   //  //rad = std::sqrt( (xb-xc)*(xb-xc) + (yb-yc)*(yb-yc) + (z0-zc)*(z0-zc));
-                  //  //amrex::Print() << " rad : " << rad << "\n"; 
+                  //  //amrex::Print() << " rad : " << rad << "\n";
                     if (!inj_pos->insidePulsarBounds(rad,PulsarParm::R_star,PulsarParm::dR_star)) {
                         //convert x, y, z to r, theta, phi;
                          p.id() = -1;

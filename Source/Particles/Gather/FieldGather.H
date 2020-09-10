@@ -67,7 +67,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                      amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dom_lo,
                      amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dom_hi,
                      amrex::Real cur_time )
-#else 
+#else
                      )
 #endif
 {
@@ -371,7 +371,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Er, Etheta, Ephi) to ex_ext
                 PulsarParm::ConvertSphericalToCartesianXComponent( Er, Etheta, Ephi,
                                                                    r, theta, phi, ex_ext);
-                // add contribution of ex_ext to 
+                // add contribution of ex_ext to
                 Exp += sx_ex[ix]*sy_ex[iy]*sz_ex[iz]*ex_ext;
 #endif
             }
@@ -406,7 +406,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Er, Etheta, Ephi) to ey_ext
                 PulsarParm::ConvertSphericalToCartesianYComponent( Er, Etheta, Ephi,
                                                                    r, theta, phi, ey_ext);
-                // add contribution of ex_ext to 
+                // add contribution of ex_ext to
                 Eyp += sx_ey[ix]*sy_ey[iy]*sz_ey[iz]*ey_ext;
 #endif
             }
@@ -441,7 +441,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Er, Etheta, Ephi) to ez_ext
                 PulsarParm::ConvertSphericalToCartesianZComponent( Er, Etheta, Ephi,
                                                                    r, theta, phi, ez_ext);
-                // add contribution of ex_ext to 
+                // add contribution of ex_ext to
                 Ezp += sx_ez[ix]*sy_ez[iy]*sz_ez[iz]*ez_ext;
 #endif
             }
@@ -476,7 +476,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Br, Btheta, Bphi) to bz_ext
                 PulsarParm::ConvertSphericalToCartesianZComponent( Br, Btheta, Bphi,
                                                                    r, theta, phi, bz_ext);
-                // add contribution of ex_ext to 
+                // add contribution of ex_ext to
                 Bzp += sx_bz[ix]*sy_bz[iy]*sz_bz[iz]*bz_ext;
 #endif
             }
@@ -511,7 +511,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Br, Btheta, Bphi) to by_ext
                 PulsarParm::ConvertSphericalToCartesianYComponent( Br, Btheta, Bphi,
                                                                    r, theta, phi, by_ext);
-                // add contribution of by_ext to 
+                // add contribution of by_ext to
                 Byp += sx_by[ix]*sy_by[iy]*sz_by[iz]*by_ext;
 #endif
             }
@@ -546,7 +546,7 @@ void doGatherShapeN (const amrex::ParticleReal xp,
                 // Convert (Br, Btheta, Bphi) to bx_ext
                 PulsarParm::ConvertSphericalToCartesianXComponent( Br, Btheta, Bphi,
                                                                    r, theta, phi, bx_ext);
-                // add contribution of by_ext to 
+                // add contribution of by_ext to
                 Bxp += sx_bx[ix]*sy_bx[iy]*sz_bx[iz]*bx_ext;
 #endif
             }
@@ -593,7 +593,7 @@ void doGatherShapeN(const GetParticlePosition& getPosition,
                     amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dom_lo,
                     amrex::GpuArray<amrex::Real, AMREX_SPACEDIM> const& dom_hi,
                     amrex::Real cur_time )
-#else               
+#else
                     )
 #endif
 {
