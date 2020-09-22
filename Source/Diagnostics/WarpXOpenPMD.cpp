@@ -270,12 +270,30 @@ WarpXOpenPMDPlot::Init (openPMD::Access access, const std::string& filePrefix)
     // see ADIOS1 limitation: https://github.com/openPMD/openPMD-api/pull/686
     m_Series = nullptr;
 
+    std::string options = R"END(
+{
+  "adios2": {
+    "dataset": {
+      "operators": [
+        {
+          "type": "zfp",
+          "parameters": {
+              "precision": "3"
+          }
+        }
+      ]
+    }
+  }
+}
+)END";
+
     if( amrex::ParallelDescriptor::NProcs() > 1 )
     {
 #if defined(AMREX_USE_MPI)
         m_Series = std::make_unique<openPMD::Series>(
             filename, access,
-            amrex::ParallelDescriptor::Communicator()
+            amrex::ParallelDescriptor::Communicator(),
+            options
         );
         m_MPISize = amrex::ParallelDescriptor::NProcs();
         m_MPIRank = amrex::ParallelDescriptor::MyProc();
@@ -285,7 +303,7 @@ WarpXOpenPMDPlot::Init (openPMD::Access access, const std::string& filePrefix)
     }
     else
     {
-        m_Series = std::make_unique<openPMD::Series>(filename, access);
+        m_Series = std::make_unique<openPMD::Series>(filename, access, options);
         m_MPISize = 1;
         m_MPIRank = 1;
     }

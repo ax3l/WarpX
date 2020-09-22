@@ -1,8 +1,8 @@
 #################################
 ####### GENERAL PARAMETERS ######
 #################################
-max_step = 1000
-amr.n_cell =  64  64  512
+max_step = 10000
+amr.n_cell =  256 256  2048
 amr.max_grid_size = 64   # maximum size of each AMReX box, used to decompose the domain
 amr.blocking_factor = 32 # minimum size of each AMReX box, used to decompose the domain
 geometry.coord_sys   = 0                  # 0: Cartesian
@@ -64,6 +64,8 @@ laser1.wavelength = 0.8e-6               # The wavelength of the laser (in m)
 
 # Diagnostics
 diagnostics.diags_names = diag1
-diag1.period = 1000
+diag1.period = 200
+diag1.format = openpmd
+diag1.openpmd_backend = bp
 diag1.diag_type = Full
 diag1.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz rho
