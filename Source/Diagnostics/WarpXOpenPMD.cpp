@@ -6,6 +6,7 @@
  */
 #include "WarpXOpenPMD.H"
 #include "FieldIO.H"  // for getReversedVec
+#include "Utils/RelativeCellPosition.H"
 #include "Utils/WarpXAlgorithmSelection.H"
 #include "Utils/WarpXUtil.H"
 
@@ -51,17 +52,13 @@ namespace detail
 #if defined(WARPX_DIM_XZ)
         vs const positionComponents{"x", "z"};
 #elif defined(WARPX_DIM_RZ)
-        // note: this will change when we back-transform
-        //       z,r,theta on the fly to cartesian coordinates
-        vs const positionComponents{"r", "z"};
-        // TODO: transform to x,y,z
         // note: although we internally store particle positions
         //       for AMReX in r,z and a theta attribute, we
         //       actually need them for algorithms (e.g. push)
         //       and I/O in Cartesian.
         //       Other attributes like momentum are consequently
         //       stored in x,y,z internally.
-        // vs const positionComponents{"x", "y", "z"};
+        vs const positionComponents{"x", "y", "z"};
 #elif (AMREX_SPACEDIM==3)
         vs const positionComponents{"x", "y", "z"};
 #else
@@ -71,11 +68,16 @@ namespace detail
     }
 
     /** Return the axis (index) names of a mesh
+     *
+     * This will be returned in C order. This is inverse of the Fortran order
+     * of the index labels for the AMReX FArrayBox.
      */
     inline std::vector< std::string >
     getFieldAxisLabels()
     {
         using vs = std::vector< std::string >;
+
+        // Fortran order of the index labels for the AMReX FArrayBox
 #if defined(WARPX_DIM_XZ)
         vs const axisLabels{"x", "z"};
 #elif defined(WARPX_DIM_RZ)
@@ -88,7 +90,9 @@ namespace detail
 #else
 #   error Unknown WarpX dimensionality.
 #endif
-        return axisLabels;
+
+        // revert to C order (fastest varying index last)
+        return {axisLabels.rbegin(), axisLabels.rend()};
     }
 
     /** Return the component names of a mesh
@@ -114,7 +118,7 @@ namespace detail
      * @param record_name name of the openPMD record
      * @return map with base quantities and power scaling
      */
-    std::map< openPMD::UnitDimension, double >
+    inline std::map< openPMD::UnitDimension, double >
     getUnitDimension( std::string const & record_name )
     {
 
@@ -148,6 +152,39 @@ namespace detail
             {openPMD::UnitDimension::T, -2.}
         };
         else return {};
+    }
+
+    /** \brief For a given field that is to be written to an openPMD file,
+     * set the metadata that indicates the physical unit.
+     */
+    inline void
+    setOpenPMDUnit( openPMD::Mesh mesh, const std::string field_name )
+    {
+        if (field_name[0] == 'E'){  // Electric field
+            mesh.setUnitDimension({
+                                          {openPMD::UnitDimension::L,  1},
+                                          {openPMD::UnitDimension::M,  1},
+                                          {openPMD::UnitDimension::T, -3},
+                                          {openPMD::UnitDimension::I, -1},
+                                  });
+        } else if (field_name[0] == 'B'){ // Magnetic field
+            mesh.setUnitDimension({
+                                          {openPMD::UnitDimension::M,  1},
+                                          {openPMD::UnitDimension::I, -1},
+                                          {openPMD::UnitDimension::T, -2}
+                                  });
+        } else if (field_name[0] == 'j'){ // current
+            mesh.setUnitDimension({
+                                          {openPMD::UnitDimension::L, -2},
+                                          {openPMD::UnitDimension::I,  1},
+                                  });
+        } else if (field_name.substr(0,3) == "rho"){ // charge density
+            mesh.setUnitDimension({
+                                          {openPMD::UnitDimension::L, -3},
+                                          {openPMD::UnitDimension::I,  1},
+                                          {openPMD::UnitDimension::T,  1},
+                                  });
+        }
     }
 #endif // WARPX_USE_OPENPMD
 }
@@ -198,7 +235,7 @@ void WarpXOpenPMDPlot::GetFileName(std::string& filename)
 }
 
 
-void WarpXOpenPMDPlot::SetStep(int ts, const std::string& filePrefix)
+void WarpXOpenPMDPlot::SetStep (int ts, const std::string& filePrefix)
 {
   AMREX_ALWAYS_ASSERT_WITH_MESSAGE(ts >= 0 , "openPMD iterations are unsigned");
 
@@ -211,12 +248,18 @@ void WarpXOpenPMDPlot::SetStep(int ts, const std::string& filePrefix)
   }
 
     m_CurrentStep =  ts;
-    Init(openPMD::AccessType::CREATE, filePrefix);
+    Init(openPMD::Access::CREATE, filePrefix);
 
 }
 
+void WarpXOpenPMDPlot::CloseStep ()
+{
+    if (m_Series)
+        m_Series->iterations[m_CurrentStep].close();
+}
+
 void
-WarpXOpenPMDPlot::Init(openPMD::AccessType accessType, const std::string& filePrefix)
+WarpXOpenPMDPlot::Init (openPMD::Access access, const std::string& filePrefix)
 {
     // either for the next ts file,
     // or init a single file for all ts
@@ -231,7 +274,7 @@ WarpXOpenPMDPlot::Init(openPMD::AccessType accessType, const std::string& filePr
     {
 #if defined(AMREX_USE_MPI)
         m_Series = std::make_unique<openPMD::Series>(
-            filename, accessType,
+            filename, access,
             amrex::ParallelDescriptor::Communicator()
         );
         m_MPISize = amrex::ParallelDescriptor::NProcs();
@@ -242,7 +285,7 @@ WarpXOpenPMDPlot::Init(openPMD::AccessType accessType, const std::string& filePr
     }
     else
     {
-        m_Series = std::make_unique<openPMD::Series>(filename, accessType);
+        m_Series = std::make_unique<openPMD::Series>(filename, access);
         m_MPISize = 1;
         m_MPIRank = 1;
     }
@@ -390,17 +433,54 @@ WarpXOpenPMDPlot::DumpToFile (WarpXParticleContainer* pc,
          {
            // Save positions
            auto const positionComponents = detail::getParticlePositionComponentLabels();
+#if defined(WARPX_DIM_RZ)
+           {
+              std::shared_ptr<amrex::ParticleReal> z(
+                      new amrex::ParticleReal[numParticleOnTile],
+                      [](amrex::ParticleReal const *p) { delete[] p; }
+              );
+              for (auto i = 0; i < numParticleOnTile; i++)
+                  z.get()[i] = aos[i].pos(1);  // {0: "r", 1: "z"}
+              std::string const positionComponent = "z";
+              currSpecies["position"]["z"].storeChunk(z, {offset}, {numParticleOnTile64});
+           }
+
+           //   reconstruct x and y from polar coordinates r, theta
+           auto const& soa = pti.GetStructOfArrays();
+           amrex::ParticleReal const* theta = soa.GetRealData(PIdx::theta).dataPtr();
+           AMREX_ALWAYS_ASSERT_WITH_MESSAGE(theta != nullptr, "openPMD: invalid theta pointer.");
+           AMREX_ALWAYS_ASSERT_WITH_MESSAGE(int(soa.GetRealData(PIdx::theta).size()) == numParticleOnTile,
+                                            "openPMD: theta and tile size do not match");
+           {
+               std::shared_ptr< amrex::ParticleReal > x(
+                       new amrex::ParticleReal[numParticleOnTile],
+                       [](amrex::ParticleReal const *p){ delete[] p; }
+               );
+               std::shared_ptr< amrex::ParticleReal > y(
+                       new amrex::ParticleReal[numParticleOnTile],
+                       [](amrex::ParticleReal const *p){ delete[] p; }
+               );
+               for (auto i=0; i<numParticleOnTile; i++) {
+                   auto const r = aos[i].pos(0);  // {0: "r", 1: "z"}
+                   x.get()[i] = r * std::cos(theta[i]);
+                   y.get()[i] = r * std::sin(theta[i]);
+               }
+               currSpecies["position"]["x"].storeChunk(x, {offset}, {numParticleOnTile64});
+               currSpecies["position"]["y"].storeChunk(y, {offset}, {numParticleOnTile64});
+           }
+#else
            for (auto currDim = 0; currDim < AMREX_SPACEDIM; currDim++) {
                 std::shared_ptr< amrex::ParticleReal > curr(
                     new amrex::ParticleReal[numParticleOnTile],
                     [](amrex::ParticleReal const *p){ delete[] p; }
                 );
                 for (auto i=0; i<numParticleOnTile; i++) {
-                     curr.get()[i] = aos[i].m_rdata.pos[currDim];
+                     curr.get()[i] = aos[i].pos(currDim);
                 }
                 std::string const positionComponent = positionComponents[currDim];
                 currSpecies["position"][positionComponent].storeChunk(curr, {offset}, {numParticleOnTile64});
            }
+#endif
 
            // save particle ID after converting it to a globally unique ID
            std::shared_ptr< uint64_t > ids(
@@ -412,7 +492,7 @@ WarpXOpenPMDPlot::DumpToFile (WarpXParticleContainer* pc,
            }
            auto const scalar = openPMD::RecordComponent::SCALAR;
            currSpecies["id"][scalar].storeChunk(ids, {offset}, {numParticleOnTile64});
-        }
+         }
          //  save "extra" particle properties in AoS and SoA
          SaveRealProperty(pti,
              currSpecies,
@@ -508,7 +588,7 @@ WarpXOpenPMDPlot::SaveRealProperty(WarpXParIter& pti,
           );
 
           for( auto kk=0; kk<numParticleOnTile; kk++ )
-               d.get()[kk] = aos[kk].m_rdata.arr[AMREX_SPACEDIM+idx];
+               d.get()[kk] = aos[kk].rdata(idx);
 
           currRecordComp.storeChunk(d,
                {offset}, {numParticleOnTile64});
@@ -705,18 +785,24 @@ WarpXOpenPMDPlot::WriteOpenPMDFields( //const std::string& filename,
 
     // Setup the mesh record accordingly
     auto mesh = meshes[field_name];
-    mesh.setDataOrder( openPMD::Mesh::DataOrder::F ); // MultiFab: Fortran order of indices and axes
+    //   MultiFab: Fortran order of indices and axes;
+    //   we invert (only) meta-data arrays to assign labels and offsets in the
+    //   order: slowest to fastest varying index when accessing the mesh
+    //   contiguously (as 1D flattened logical memory)
+    mesh.setDataOrder( openPMD::Mesh::DataOrder::C );
     mesh.setAxisLabels( axis_labels );
     mesh.setGridSpacing( grid_spacing );
     mesh.setGridGlobalOffset( global_offset );
     mesh.setAttribute( "fieldSmoothing", "none" );
-    setOpenPMDUnit( mesh, field_name );
+    detail::setOpenPMDUnit( mesh, field_name );
 
     // Create a new mesh record component, and store the associated metadata
     auto mesh_comp = mesh[comp_name];
     mesh_comp.resetDataset( dataset );
-    // Cell-centered data: position is at 0.5 of a cell size.
-    mesh_comp.setPosition( std::vector<double>{AMREX_D_DECL(0.5, 0.5, 0.5)} );
+
+    auto relative_cell_pos = utils::getRelativeCellPosition( mf );       // AMReX Fortran index order
+    std::reverse( relative_cell_pos.begin(), relative_cell_pos.end() );  // now in C order
+    mesh_comp.setPosition( relative_cell_pos );
 
     // Loop through the multifab, and store each box as a chunk,
     // in the openPMD file.

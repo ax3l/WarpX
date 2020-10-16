@@ -32,19 +32,25 @@ ParticleDiag::ParticleDiag(std::string diag_name, std::string name, WarpXParticl
     // If not none, set plot_flags values to 1 for elements in variables.
     if (variables[0] != "none"){
         for (const auto& var : variables){
-            // Return error if var not in PIdx.
-            WarpXUtilMsg::AlwaysAssert(
-                ParticleStringNames::to_index.count(var),
-                "ERROR: variables argument '" + var +
-                "' not in ParticleStringNames"
-                );
-            plot_flags[ParticleStringNames::to_index.at(var)] = 1;
+            // The string "rho" is needed to dump rho per species, which is generated
+            // on the fly from existing species variables. Hence, "rho" is not part
+            // of the species' PIdx variables.
+            if (var != "rho") {
+                // Return error if var not in PIdx.
+                WarpXUtilMsg::AlwaysAssert(
+                    ParticleStringNames::to_index.count(var),
+                    "ERROR: variables argument '" + var +
+                    "' not in ParticleStringNames"
+                    );
+                plot_flags[ParticleStringNames::to_index.at(var)] = 1;
+            }
         }
     }
 
 #ifdef WARPX_DIM_RZ
     // Always write out theta, whether or not it's requested,
     // to be consistent with always writing out r and z.
+    // TODO: openPMD does a reconstruction to Cartesian, so we can now skip force-writing this
     plot_flags[ParticleStringNames::to_index.at("theta")] = 1;
 #endif
 

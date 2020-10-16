@@ -92,6 +92,8 @@ protected:
         back-transform diagnostics) to be processed for diagnostics.
      */
     virtual void PrepareFieldDataForOutput () {}
+    /** Shift the diag-domain boundary for moving window and galilean simulations */
+    virtual void MovingWindowAndGalileanDomainShift () {}
     /** Name of diagnostics: runtime parameter given in the input file. */
     std::string m_diag_name;
     /** Prefix for output directories */
@@ -116,21 +118,31 @@ protected:
      *  The second vector is loops over the total number of levels.
      */
     amrex::Vector< amrex::Vector< amrex::MultiFab > >  m_mf_output;
+
+    /** Geometry that defines the domain attributes corresponding to output multifab.
+     *  Specifically, the user-defined physical co-ordinates for the diagnostics
+     *  is used to construct the geometry information for each MultiFab at
+     *  the respective levels. This geometry will be used to write out
+     *  plotfile data using the WriteToFile() function
+     */
+    amrex::Vector< amrex::Vector <amrex::Geometry> > m_geom_output;
     // a particle buffer here?
     int nlev; /**< number of levels to output */
     int nmax_lev; /**< max_level to allocate output multifab and vector of field functors. */
     /** Number of levels to be output*/
     int nlev_output;
-    /** Name of species to write to file */
-    std::vector< std::string > m_species_names;
+    /** Names of species to write to output */
+    std::vector< std::string > m_output_species_names;
+    /** Names of all species in the simulation */
+    std::vector< std::string > m_all_species_names;
     /** Each element of this vector handles output for 1 species */
-    amrex::Vector< ParticleDiag > m_all_species;
+    amrex::Vector< ParticleDiag > m_output_species;
     /** Vector of (pointers to) functors to compute output fields, per level,
      * per component. This allows for simple operations (averaging to
      * cell-center for standard EB fields) as well as more involved operations
      * (back-transformed diagnostics, filtering, reconstructing cartesian
      * fields in cylindrical). */
-    amrex::Vector< amrex::Vector <std::unique_ptr<ComputeDiagFunctor const> > > m_all_field_functors;
+    amrex::Vector< amrex::Vector <std::unique_ptr<ComputeDiagFunctor > > > m_all_field_functors;
     /** Coarsening ratio such that, fields are averaged to the coarsened grid.
       * The ratio should render the grid to be coarsenable (as defined by AMReX). */
     amrex::IntVect m_crse_ratio = amrex::IntVect(1);
@@ -140,6 +152,8 @@ protected:
     amrex::Vector< amrex::Real> m_hi;
     /** Number of output buffers. The value is set to 1 for all FullDiagnostics */
     int m_num_buffers;
+    /** Array of species indices that dump rho per species */
+    amrex::Vector<int> m_rho_per_species_index;
 };
 
 #endif // WARPX_DIAGNOSTICS_H_

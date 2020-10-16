@@ -65,7 +65,7 @@ ParticleHistogram::ParticleHistogram (std::string rd_name)
     }
 
     // get MultiParticleContainer class object
-    auto & mypc = WarpX::GetInstance().GetPartContainer();
+    const auto & mypc = WarpX::GetInstance().GetPartContainer();
     // get species names (std::vector<std::string>)
     auto const species_names = mypc.GetSpeciesNames();
     // select species
@@ -88,9 +88,8 @@ ParticleHistogram::ParticleHistogram (std::string rd_name)
         if ( m_IsNotRestart )
         {
             // open file
-            std::ofstream ofs;
-            ofs.open(m_path + m_rd_name + "." + m_extension,
-                std::ofstream::out | std::ofstream::app);
+            std::ofstream ofs{m_path + m_rd_name + "." + m_extension,
+                std::ofstream::out | std::ofstream::app};
             // write header row
             ofs << "#";
             ofs << "[1]step()";
@@ -118,7 +117,7 @@ void ParticleHistogram::ComputeDiags (int step)
 {
 
     // Judge if the diags should be done
-    if ( (step+1) % m_freq != 0 ) return;
+    if (!m_intervals.contains(step+1)) return;
 
     // get WarpX class object
     auto & warpx = WarpX::GetInstance();
@@ -127,7 +126,7 @@ void ParticleHistogram::ComputeDiags (int step)
     auto const t = warpx.gett_new(0);
 
     // get MultiParticleContainer class object
-    auto & mypc = warpx.GetPartContainer();
+    const auto & mypc = warpx.GetPartContainer();
 
     // get WarpXParticleContainer class object
     auto const & myspc = mypc.GetParticleContainer(m_selected_species_id);
@@ -135,7 +134,7 @@ void ParticleHistogram::ComputeDiags (int step)
     using PType = typename WarpXParticleContainer::SuperParticleType;
 
     // get parser
-    ParserWrapper<m_nvars> *fun_partparser = m_parser.get();
+    HostDeviceParser<m_nvars> fun_partparser = getParser(m_parser);
 
     // declare local variables
     Real const bin_min  = m_bin_min;
@@ -156,7 +155,7 @@ void ParticleHistogram::ComputeDiags (int step)
             auto const ux = p.rdata(PIdx::ux)/PhysConst::c;
             auto const uy = p.rdata(PIdx::uy)/PhysConst::c;
             auto const uz = p.rdata(PIdx::uz)/PhysConst::c;
-            auto const f = (*fun_partparser)(t,x,y,z,ux,uy,uz);
+            auto const f = fun_partparser(t,x,y,z,ux,uy,uz);
             auto const f1 = bin_min + bin_size*i;
             auto const f2 = bin_min + bin_size*(i+1);
             if ( f > f1 && f < f2 ) {

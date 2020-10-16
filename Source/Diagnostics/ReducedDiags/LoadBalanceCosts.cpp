@@ -29,7 +29,7 @@ void LoadBalanceCosts::ComputeDiags (int step)
 
     // judge if the diags should be done
     // costs is initialized only if we're doing load balance
-    if ( ((step+1) % m_freq != 0) ||
+    if (!m_intervals.contains(step+1) ||
           !warpx.get_load_balance_intervals().isActivated() ) { return; }
 
     // get number of boxes over all levels
@@ -183,9 +183,8 @@ void LoadBalanceCosts::ComputeDiags (int step)
 void LoadBalanceCosts::WriteToFile (int step) const
 {
     // open file
-    std::ofstream ofs;
-    ofs.open(m_path + m_rd_name + "." + m_extension,
-            std::ofstream::out | std::ofstream::app);
+    std::ofstream ofs{m_path + m_rd_name + "." + m_extension,
+            std::ofstream::out | std::ofstream::app};
 
     // write step
     ofs << step+1 << m_sep;
@@ -197,7 +196,7 @@ void LoadBalanceCosts::WriteToFile (int step) const
     ofs << WarpX::GetInstance().gett_new(0);
 
     // loop over data size and write
-    for (int i = 0; i < m_data.size(); ++i)
+    for (int i = 0; i < static_cast<int>(m_data.size()); ++i)
     {
         ofs << m_sep << m_data[i];
         if ((i - m_nDataFields + 1)%m_nDataFields == 0)
@@ -206,7 +205,7 @@ void LoadBalanceCosts::WriteToFile (int step) const
             int ind_rank = i - m_nDataFields + 2; // index for the rank corresponding to current box
 
             // m_data --> rank --> hostname
-            ofs << m_sep << m_data_string[m_data[ind_rank]];
+            ofs << m_sep << m_data_string[static_cast<long unsigned int>(m_data[ind_rank])];
         }
     }
     // end loop over data size
@@ -224,7 +223,7 @@ void LoadBalanceCosts::WriteToFile (int step) const
     if (!ParallelDescriptor::IOProcessor()) return;
 
     // final step is a special case, fill jagged array with NaN
-    if (step == (warpx.maxStep() - (warpx.maxStep()%m_freq) - 1 ))
+    if (m_intervals.nextContains(step+1) > warpx.maxStep())
     {
         // open tmp file to copy data
         std::string fileTmpName = m_path + m_rd_name + ".tmp." + m_extension;
