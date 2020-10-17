@@ -439,14 +439,10 @@ WarpX::OneStep_nosub (Real cur_time)
     if (do_pml && pml_has_particles) CopyJPML();
     if (do_pml && do_pml_j_damping) DampJPML();
 
-//#ifdef PULSAR
-//    ApplyPulsarEBFieldsOnGrid();
-//#endif
     if (!do_electrostatic) {
     // Electromagnetic solver:
     // Push E and B from {n} to {n+1}
     // (And update guard cells immediately afterwards)
-
 #ifdef WARPX_USE_PSATD
         if (use_hybrid_QED)
         {
@@ -465,7 +461,6 @@ WarpX::OneStep_nosub (Real cur_time)
         }
         if (do_pml) DampPML();
 #else
-
         EvolveF(0.5*dt[0], DtType::FirstHalf);
         FillBoundaryF(guard_cells.ng_FieldSolverF);
         EvolveB(0.5*dt[0]); // We now have B^{n+1/2}
