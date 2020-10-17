@@ -533,10 +533,6 @@ public:
      */
     void ComputeCostsHeuristic (amrex::Vector<std::unique_ptr<amrex::LayoutData<amrex::Real> > >& costs);
 
-#ifdef PULSAR
-    void ApplyPulsarEBFieldsOnGrid ();
-#endif
-
 protected:
 
     /**
