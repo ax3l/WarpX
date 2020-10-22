@@ -108,6 +108,7 @@ pulsar.center_star = 90000 90000 90000
 pulsar.R_star = 12032                  # radius of NS (m)
 pulsar.B_star = 8.0323e-6                  # magnetic field of NS (T)
 pulsar.dR = 1400                       # thickness on the surface of the pulsar
+pulsar.Chi = 45
                                        # consistency requires dR = my_constants.dR
 pulsar.verbose = 0                     # [0/1]: turn on verbosity for debugging print statements
 pulsar.EB_external = 1                 # [0/1]: to apply external E and B
