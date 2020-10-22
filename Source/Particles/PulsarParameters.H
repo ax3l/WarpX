@@ -28,6 +28,7 @@ namespace PulsarParm
     extern AMREX_GPU_DEVICE_MANAGED amrex::Real Ninj_fraction;
     extern AMREX_GPU_DEVICE_MANAGED amrex::Real rhoGJ_scale;
     extern AMREX_GPU_DEVICE_MANAGED int damp_EB_internal;
+    extern AMREX_GPU_DEVICE_MANAGED amrex::Real Chi;
 
     extern AMREX_GPU_DEVICE_MANAGED int verbose;
 
@@ -52,30 +53,42 @@ namespace PulsarParm
                                   amrex::Real &Er, amrex::Real &Etheta, amrex::Real &Ephi)
     {
         amrex::Real omega = Omega(time);
-        amrex::Real c_theta = std::cos(theta);
-        amrex::Real s_theta = std::sin(theta);
-        amrex::Real c_phi   = std::cos(phi);
-        amrex::Real s_phi   = std::sin(phi);
         amrex::Real r_ratio = R_star/r;
-        // inside pulsar
+        amrex::Real c_theta = std::cos(theta); // polar angle
+        amrex::Real s_theta = std::sin(theta); // polar angle
+        amrex::Real c_chi = std::cos(Chi); // oblique angle
+        amrex::Real s_chi = std::sin(Chi); // oblique angle
+        // The instantaneous phase, psi = phi - Omega*t
+        amrex::Real psi = phi - omega*time;
+        amrex::Real c_psi = std::cos(psi);
+        amrex::Real s_psi = std::sin(psi);
+        // E-field inside pulsar that corresponds to a dipole magnetization
+        // Eq 2.9(a-c) Jeromi Petri 2016
         if ( r < R_star -dR_star ) {
             amrex::Real r2 = r_ratio * r_ratio;
-            // Michel and Li -- eq 14 , 15
-            Er     =  B_star * omega * r2 * r * s_theta * s_theta;
-            Etheta = -B_star * omega * r2 * r * 2.0 * s_theta * c_theta;
-            Ephi = 0.0; // aligned magnetic and rotation axis
+            Er     =  B_star * omega * r2 * R_star
+                   * (c_chi*s_theta*s_theta - s_chi*c_theta*s_theta*c_psi );
+            Etheta = -B_star * omega * r2 * R_star
+                   * (2._rt*s_theta*c_theta*c_chi + 2._rt*s_chi*s_theta*s_theta*c_psi);
+            Ephi = 0._rt; // no Ephi inside the pulsar for dipole magnetization for any Chi
         }
 
-        // outside pulsar
+        // outside pulsar Eq 2.8(a)-2.8(c) of Jeromi Petri, 2016
         if ( r >= (R_star - dR_star ) ) {
             amrex::Real r4 = r_ratio*r_ratio*r_ratio*r_ratio;
-            // Taking derivative of phi given in eq 30 of Michel and Li
-            Er = B_star * omega * R_star * r4 * (1.0-3.0*c_theta*c_theta);
+            amrex::Real r2 = r_ratio*r_ratio;
+            Er = B_star * omega * R_star * r4
+               * ( c_chi * (1._rt-3._rt*c_theta*c_theta)
+                   - 3._rt*s_chi*c_theta*s_theta*c_psi
+                 );
             if (E_external_monopole == 1) {
-                 Er += (2.0/3.0) * omega * B_star * R_star * r_ratio * r_ratio;
+                 Er += (2._rt/3._rt) * omega * B_star * R_star * r_ratio * r_ratio;
             }
-            Etheta = (-1.0) * B_star * omega * R_star * r4 * (2.0*s_theta*c_theta);
-            Ephi = 0.0;
+            Etheta = B_star * omega * R_star
+                   * ( r2 * s_chi * (r2*std::cos(2._rt*theta) - 1._rt) * c_psi
+                       - r4 * c_chi * std::sin(2._rt*theta)
+                     );
+            Ephi = B_star * omega * R_star * r2 * (1._rt - r2) * s_chi * c_theta * s_psi;
         }
     }
 
@@ -85,15 +98,21 @@ namespace PulsarParm
                                   amrex::Real &Br, amrex::Real &Btheta, amrex::Real &Bphi)
     {
         amrex::Real omega = Omega(time);
-        amrex::Real c_theta = std::cos(theta);
-        amrex::Real s_theta = std::sin(theta);
         amrex::Real r_ratio = R_star/r;
         amrex::Real r3 = r_ratio*r_ratio*r_ratio;
-        // Michel and Li -- eq 14 and 15 from michel and li
-        // dipole B field inside and outside the pulsar
-        Br     = 2.0*B_star*r3*c_theta;
-        Btheta = B_star*r3*s_theta;
-        Bphi   = 0.0;
+        amrex::Real c_theta = std::cos(theta);
+        amrex::Real s_theta = std::sin(theta);
+        amrex::Real c_chi = std::cos(Chi);
+        amrex::Real s_chi = std::sin(Chi);
+        // The instantaneous phase, psi = phi - Omega*t
+        amrex::Real psi = phi - omega*time;
+        amrex::Real c_psi = std::cos(psi);
+        amrex::Real s_psi = std::sin(psi);
+        // The full dipole magnetic field as a funciton of (theta, phi, omega, t, and Chi)
+        // Eq 2.7(a) - 2.7(c) of Jeromi Petri, 2016 article
+        Br     = 2.0_rt*B_star*r3*( c_chi*c_theta + s_chi*s_theta*c_psi );
+        Btheta = B_star*r3*( c_chi*s_theta - s_chi*c_theta*c_psi );
+        Bphi   = B_star*r3*s_chi*s_psi;
     }
 
     namespace Spherical
