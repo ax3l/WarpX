@@ -66,10 +66,14 @@ namespace PulsarParm
         // Eq 2.9(a-c) Jeromi Petri 2016
         if ( r < R_star -dR_star ) {
             amrex::Real r2 = r_ratio * r_ratio;
-            Er     =  B_star * omega * r2 * R_star
-                   * (c_chi*s_theta*s_theta - s_chi*c_theta*s_theta*c_psi );
-            Etheta = -B_star * omega * r2 * R_star
-                   * (2._rt*s_theta*c_theta*c_chi + 2._rt*s_chi*s_theta*s_theta*c_psi);
+            Er     =  B_star * omega * r2 * R_star *
+                      ( c_chi * s_theta * s_theta -
+                        s_chi * c_theta * s_theta * c_psi
+                      );
+            Etheta = -B_star * omega * r2 * R_star *
+                     ( 2._rt * s_theta * c_theta * c_chi +
+                       2._rt * s_chi * s_theta * s_theta * c_psi
+                     );
             Ephi = 0._rt; // no Ephi inside the pulsar for dipole magnetization for any Chi
         }
 
@@ -77,18 +81,18 @@ namespace PulsarParm
         if ( r >= (R_star - dR_star ) ) {
             amrex::Real r4 = r_ratio*r_ratio*r_ratio*r_ratio;
             amrex::Real r2 = r_ratio*r_ratio;
-            Er = B_star * omega * R_star * r4
-               * ( c_chi * (1._rt-3._rt*c_theta*c_theta)
-                   - 3._rt*s_chi*c_theta*s_theta*c_psi
+            Er = B_star * omega * R_star * r4 *
+                 ( c_chi * (1._rt - 3._rt * c_theta * c_theta) -
+                   3._rt * s_chi * c_theta * s_theta * c_psi
                  );
             if (E_external_monopole == 1) {
                  Er += (2._rt/3._rt) * omega * B_star * R_star * r_ratio * r_ratio;
             }
-            Etheta = B_star * omega * R_star
-                   * ( r2 * s_chi * (r2*std::cos(2._rt*theta) - 1._rt) * c_psi
-                       - r4 * c_chi * std::sin(2._rt*theta)
+            Etheta = B_star * omega * R_star *
+                     ( r2 * s_chi * (r2 * std::cos(2._rt*theta) - 1._rt) * c_psi -
+                       r4 * c_chi * std::sin(2._rt*theta)
                      );
-            Ephi = B_star * omega * R_star * r2 * (1._rt - r2) * s_chi * c_theta * s_psi;
+            Ephi   = B_star * omega * R_star * r2 * (1._rt - r2) * s_chi * c_theta * s_psi;
         }
     }
 
@@ -110,9 +114,10 @@ namespace PulsarParm
         amrex::Real s_psi = std::sin(psi);
         // The full dipole magnetic field as a funciton of (theta, phi, omega, t, and Chi)
         // Eq 2.7(a) - 2.7(c) of Jeromi Petri, 2016 article
-        Br     = 2.0_rt*B_star*r3*( c_chi*c_theta + s_chi*s_theta*c_psi );
-        Btheta = B_star*r3*( c_chi*s_theta - s_chi*c_theta*c_psi );
-        Bphi   = B_star*r3*s_chi*s_psi;
+        Br     = 2.0_rt * B_star * r3 *
+                 ( c_chi * c_theta + s_chi * s_theta * c_psi );
+        Btheta = B_star * r3 * ( c_chi * s_theta - s_chi * c_theta * c_psi );
+        Bphi   = B_star * r3 * s_chi * s_psi;
     }
 
     namespace Spherical
