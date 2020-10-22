@@ -24,7 +24,6 @@
 #include "Utils/WarpXAlgorithmSelection.H"
 #ifdef PULSAR
     #include "Particles/PulsarParameters.H"
-    #include "Particles/AddPulsarPlasma.H"
 #endif
 
 #include <AMReX_Print.H>
@@ -589,8 +588,6 @@ PhysicalParticleContainer::AddPlasma (int lev, RealBox part_realbox)
     const MultiFab& rho_mf = WarpX::GetInstance().getrho_fp(lev);
     const Real dt = WarpX::GetInstance().getdt(0);
     amrex::Real omega_check = PulsarParm::Omega(t);
-    amrex::Print() << " omega_check : " << omega_check << "\n";
-    const auto precheck_PulsarAddPlasmaCondition = AddPulsarPlasmaCondition();
 #endif
 
 #ifdef WARPX_DIM_RZ
@@ -877,48 +874,11 @@ PhysicalParticleContainer::AddPlasma (int lev, RealBox part_realbox)
                     amrex::Real yc = PulsarParm::center_star[1];
                     amrex::Real zc = PulsarParm::center_star[2];
                     amrex::Real rad = std::sqrt( (xb-xc)*(xb-xc) + (yb-yc)*(yb-yc) + (z0-zc)*(z0-zc));
-                  //  amrex::Real part_r_cl = std::sqrt( (xb-xc)*(xb-xc) + (yb-yc)*(yb-yc) );
-                  //  //amrex::Real part_theta = 0.0_rt;
-                  //  //if ( part_r_cl > 0.0 ) part_theta = std::acos( (z0-zc)/rad );
-                  //  //amrex::Real part_phi = std::atan2( (yb-yc), (xb-xc) );
-                  //  amrex::Real c_theta = (z0-zc)/rad;
-                  //  amrex::Real s_theta = part_r_cl/rad;
-                  //  amrex::Real c_phi = 0.0;
-                  //  amrex::Real s_phi = 0.0;
-                  //  if ( part_r_cl > 0.0 ) {
-                  //      c_phi = (xb-xc)/part_r_cl;
-                  //      s_phi = (yb-yc)/part_r_cl;
-                  //  }
-                  //  //amrex::Print() << " part_theta : " << part_theta << "\n";
-                  //  //amrex::Print() << " part phi : " << part_phi << "\n";
-                  //  //amrex::Print() << " cos theta : " << std::cos(part_theta) << "\n";
-                  //  //amrex::Print() << " sin theta : " << std::sin(part_theta) << "\n";
-                  //  //amrex::Print() << " cos phi : " << std::cos(part_phi) << "\n";
-                  //  //amrex::Print() << " sin phi: " << std::sin(part_phi) << "\n";
-                  //  //amrex::Print() << " ctheta : " << c_theta << " stheta " << s_theta << "\n";
-                  //  //amrex::Print() << " c phi : " << c_phi << " s phi " << s_phi << "\n";
-                  //  rad = PulsarParm::R_star - PulsarParm::dR_star*0.01;
-                  //  //amrex::Print() << " reduced rad : " << rad << "\n";
-                  //  xb = xc + rad * s_theta * c_phi;
-                  //  yb = yc + rad * s_theta * s_phi;
-                  //  z0 = zc + rad * c_theta;
-                  //  //amrex::Print() << " new xyz  : " << xb << " " << yb << " " << z0 << "\n";
-                  //  pos.x = xb;
-                  //  pos.y = yb;
-                  //  //rad = std::sqrt( (xb-xc)*(xb-xc) + (yb-yc)*(yb-yc) + (z0-zc)*(z0-zc));
-                  //  //amrex::Print() << " rad : " << rad << "\n";
                     if (!inj_pos->insidePulsarBounds(rad,PulsarParm::R_star,PulsarParm::dR_star)) {
                         //convert x, y, z to r, theta, phi;
                          p.id() = -1;
-//                       continue;
+                       continue;
                     }
-                   /// accessign efield
-                   int ii = Ex_lo.x + iv[0];
-                   int jj = Ex_lo.y + iv[1];
-                   int kk = Ex_lo.z + iv[2];
-                   precheck_PulsarAddPlasmaCondition( overlap_corner, i, j, k, dx, t,
-                                                  ex_arr, ey_arr, ez_arr, rho_arr,
-                                                  ii, jj, kk, p, q_pm, i_part, num_ppc,1);
 #endif
 
                     u = inj_mom->getMomentum(pos.x, pos.y, z0, engine);
