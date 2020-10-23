@@ -2,6 +2,9 @@ name: Ubuntu build
 
 on: [push, pull_request]
 
+env:
+  CXXFLAGS: "-Werror -Wno-error=pass-failed"
+
 jobs:
 # Ref.:
 #   https://gitlab.com/nvidia/container-images/cuda/-/blob/master/dist/ubuntu18.04/10.1/base/Dockerfile
@@ -10,6 +13,7 @@ jobs:
   build_nvcc:
     name: NVCC 11.0.2 SP [Linux]
     runs-on: ubuntu-18.04
+    env: { CXXFLAGS: "-Werror" }
     steps:
     - uses: actions/checkout@v2
     - name: install dependencies
@@ -134,6 +138,7 @@ jobs:
   build_hip:
     name: HIP SP [Linux]
     runs-on: ubuntu-20.04
+    env: { CXXFLAGS: "-Werror -Wno-error=pass-failed -Wno-unreachable-code" }
     steps:
     - uses: actions/checkout@v2
     - name: install dependencies
