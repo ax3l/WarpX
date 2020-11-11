@@ -53,7 +53,6 @@ namespace PulsarParm
                                   amrex::Real &Er, amrex::Real &Etheta, amrex::Real &Ephi)
     {
         amrex::Real omega = Omega(time);
-<<<<<<< HEAD
         amrex::Real r_ratio = R_star/r;
         amrex::Real c_theta = std::cos(theta); // polar angle
         amrex::Real s_theta = std::sin(theta); // polar angle
@@ -94,32 +93,6 @@ namespace PulsarParm
                        r4 * c_chi * std::sin(2._rt*theta)
                      );
             Ephi   = B_star * omega * R_star * r2 * (1._rt - r2) * s_chi * c_theta * s_psi;
-=======
-        amrex::Real c_theta = std::cos(theta);
-        amrex::Real s_theta = std::sin(theta);
-        amrex::Real c_phi   = std::cos(phi);
-        amrex::Real s_phi   = std::sin(phi);
-        amrex::Real r_ratio = R_star/r;
-        // inside pulsar
-        if ( r < R_star -dR_star ) {
-            amrex::Real r2 = r_ratio * r_ratio;
-            // Michel and Li -- eq 14 , 15
-            Er     =  B_star * omega * r2 * r * s_theta * s_theta;
-            Etheta = -B_star * omega * r2 * r * 2.0 * s_theta * c_theta;
-            Ephi = 0.0; // aligned magnetic and rotation axis
-        }
-
-        // outside pulsar
-        if ( r >= (R_star - dR_star ) ) {
-            amrex::Real r4 = r_ratio*r_ratio*r_ratio*r_ratio;
-            // Taking derivative of phi given in eq 30 of Michel and Li
-            Er = B_star * omega * R_star * r4 * (1.0-3.0*c_theta*c_theta);
-            if (E_external_monopole == 1) {
-                 Er += (2.0/3.0) * omega * B_star * R_star * r_ratio * r_ratio;
-            }
-            Etheta = (-1.0) * B_star * omega * R_star * r4 * (2.0*s_theta*c_theta);
-            Ephi = 0.0;
->>>>>>> ee46f94ca73e8c44121ec6c11a7445e11a13413e
         }
     }
 
@@ -129,7 +102,6 @@ namespace PulsarParm
                                   amrex::Real &Br, amrex::Real &Btheta, amrex::Real &Bphi)
     {
         amrex::Real omega = Omega(time);
-<<<<<<< HEAD
         amrex::Real r_ratio = R_star/r;
         amrex::Real r3 = r_ratio*r_ratio*r_ratio;
         amrex::Real c_theta = std::cos(theta);
@@ -146,17 +118,6 @@ namespace PulsarParm
                  ( c_chi * c_theta + s_chi * s_theta * c_psi );
         Btheta = B_star * r3 * ( c_chi * s_theta - s_chi * c_theta * c_psi );
         Bphi   = B_star * r3 * s_chi * s_psi;
-=======
-        amrex::Real c_theta = std::cos(theta);
-        amrex::Real s_theta = std::sin(theta);
-        amrex::Real r_ratio = R_star/r;
-        amrex::Real r3 = r_ratio*r_ratio*r_ratio;
-        // Michel and Li -- eq 14 and 15 from michel and li
-        // dipole B field inside and outside the pulsar
-        Br     = 2.0*B_star*r3*c_theta;
-        Btheta = B_star*r3*s_theta;
-        Bphi   = 0.0;
->>>>>>> ee46f94ca73e8c44121ec6c11a7445e11a13413e
     }
 
     namespace Spherical
