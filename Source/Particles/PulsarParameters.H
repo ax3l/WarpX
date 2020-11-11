@@ -53,6 +53,7 @@ namespace PulsarParm
                                   amrex::Real &Er, amrex::Real &Etheta, amrex::Real &Ephi)
     {
         amrex::Real omega = Omega(time);
+<<<<<<< HEAD
         amrex::Real r_ratio = R_star/r;
         amrex::Real c_theta = std::cos(theta); // polar angle
         amrex::Real s_theta = std::sin(theta); // polar angle
@@ -93,6 +94,32 @@ namespace PulsarParm
                        r4 * c_chi * std::sin(2._rt*theta)
                      );
             Ephi   = B_star * omega * R_star * r2 * (1._rt - r2) * s_chi * c_theta * s_psi;
+=======
+        amrex::Real c_theta = std::cos(theta);
+        amrex::Real s_theta = std::sin(theta);
+        amrex::Real c_phi   = std::cos(phi);
+        amrex::Real s_phi   = std::sin(phi);
+        amrex::Real r_ratio = R_star/r;
+        // inside pulsar
+        if ( r < R_star -dR_star ) {
+            amrex::Real r2 = r_ratio * r_ratio;
+            // Michel and Li -- eq 14 , 15
+            Er     =  B_star * omega * r2 * r * s_theta * s_theta;
+            Etheta = -B_star * omega * r2 * r * 2.0 * s_theta * c_theta;
+            Ephi = 0.0; // aligned magnetic and rotation axis
+        }
+
+        // outside pulsar
+        if ( r >= (R_star - dR_star ) ) {
+            amrex::Real r4 = r_ratio*r_ratio*r_ratio*r_ratio;
+            // Taking derivative of phi given in eq 30 of Michel and Li
+            Er = B_star * omega * R_star * r4 * (1.0-3.0*c_theta*c_theta);
+            if (E_external_monopole == 1) {
+                 Er += (2.0/3.0) * omega * B_star * R_star * r_ratio * r_ratio;
+            }
+            Etheta = (-1.0) * B_star * omega * R_star * r4 * (2.0*s_theta*c_theta);
+            Ephi = 0.0;
+>>>>>>> ee46f94ca73e8c44121ec6c11a7445e11a13413e
         }
     }
 
@@ -102,6 +129,7 @@ namespace PulsarParm
                                   amrex::Real &Br, amrex::Real &Btheta, amrex::Real &Bphi)
     {
         amrex::Real omega = Omega(time);
+<<<<<<< HEAD
         amrex::Real r_ratio = R_star/r;
         amrex::Real r3 = r_ratio*r_ratio*r_ratio;
         amrex::Real c_theta = std::cos(theta);
@@ -118,12 +146,23 @@ namespace PulsarParm
                  ( c_chi * c_theta + s_chi * s_theta * c_psi );
         Btheta = B_star * r3 * ( c_chi * s_theta - s_chi * c_theta * c_psi );
         Bphi   = B_star * r3 * s_chi * s_psi;
+=======
+        amrex::Real c_theta = std::cos(theta);
+        amrex::Real s_theta = std::sin(theta);
+        amrex::Real r_ratio = R_star/r;
+        amrex::Real r3 = r_ratio*r_ratio*r_ratio;
+        // Michel and Li -- eq 14 and 15 from michel and li
+        // dipole B field inside and outside the pulsar
+        Br     = 2.0*B_star*r3*c_theta;
+        Btheta = B_star*r3*s_theta;
+        Bphi   = 0.0;
+>>>>>>> ee46f94ca73e8c44121ec6c11a7445e11a13413e
     }
 
     namespace Spherical
     {
         AMREX_GPU_HOST_DEVICE AMREX_INLINE
-        amrex::Real r(int i, int j, int k, amrex::GeometryData const& geom, int const* const AMREX_RESTRICT mf_ixType)
+        amrex::Real r(int i, int j, int k, amrex::GeometryData const& geom, amrex::GpuArray<int, 3> const mf_ixType)
         {
             const auto domain_box = geom.Domain();
             const auto domain_ilo = amrex::lbound(domain_box);
@@ -208,16 +247,14 @@ namespace PulsarParm
 
 
     AMREX_GPU_HOST_DEVICE AMREX_INLINE
-    void DampField(int i, int j, int k, amrex::GeometryData const& geom, amrex::Array4<amrex::Real> const& Efield, int const* const AMREX_RESTRICT mf_ixtype)
+    void DampField(int i, int j, int k, amrex::GeometryData const& geom, amrex::Array4<amrex::Real> const& Efield, amrex::GpuArray<int, 3> const mf_ixtype)
     {
-        const amrex::Real r = Spherical::r(i, j, k, geom, mf_ixtype);
-
+        amrex::Real r = Spherical::r(i, j, k, geom, mf_ixtype);
         if (r < R_star) {
             // Damping function: Fd = tanh(damping_scale * (r / R_star - 1)) + 1
             // for damping_scale >= 10 or so:
             // Fd(0) ~ 0
             // Fd(R_star) ~ 1
-
             const amrex::Real Fd = std::tanh(damping_scale * (r / R_star - 1.0)) + 1.0;
             Efield(i, j, k) = Efield(i, j, k) * Fd;
         }
