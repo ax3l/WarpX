@@ -241,6 +241,8 @@ endif()
 target_compile_definitions(WarpX PRIVATE
     WARPX_PARSER_DEPTH=${WarpX_PARSER_DEPTH})
 
+target_compile_definitions(WarpX PRIVATE PULSAR)
+
 
 # Warnings ####################################################################
 #
