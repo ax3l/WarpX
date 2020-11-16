@@ -13,10 +13,11 @@
 #################################
 ####### GENERAL PARAMETERS ######
 #################################
-max_step = 50000
+#max_step = 50000
+max_step = 10000
 amr.n_cell = 256 256 256
-amr.max_grid_size = 128
-amr.blocking_factor = 128
+#amr.max_grid_size = 128
+#amr.blocking_factor = 128
 amr.max_level = 0
 geometry.coord_sys   = 0                  # 0: Cartesian
 geometry.is_periodic = 0 0 0     # Is periodic?
@@ -31,7 +32,8 @@ geometry.prob_hi     = 180000 180000 180000
 warpx.verbose = 1
 warpx.do_dive_cleaning = 0
 warpx.use_filter = 1
-warpx.cfl = .2
+#warpx.cfl = .2
+warpx.cfl = .99
 
 ###### PML input #####
 warpx.do_pml = 1
@@ -94,14 +96,19 @@ plasma_p.momentum_function_uz(x,y,z) = "0.0"
 plasma_p.do_continuous_injection = 0
 plasma_p.density_min = 1E0
 
-diagnostics.diags_names = plt chk
-plt.diag_type = Full
-plt.period = 20
-plt.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz part_per_cell rho divE rho_plasma_p rho_plasma_e
+diagnostics.diags_names = ascent # plt chk
+ascent.diag_type = Full
+ascent.period = 5
+ascent.format = ascent
+ascent.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz part_per_cell rho divE rho_plasma_p rho_plasma_e
 
-chk.format = checkpoint
-chk.diag_type = Full
-chk.period = 500
+#plt.diag_type = Full
+#plt.period = 20
+#plt.fields_to_plot = Ex Ey Ez Bx By Bz jx jy jz part_per_cell rho divE rho_plasma_p rho_plasma_e
+
+#chk.format = checkpoint
+#chk.diag_type = Full
+#chk.period = 500
 
 #################################
 ######### PULSAR SETUP ##########

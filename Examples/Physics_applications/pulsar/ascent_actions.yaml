@@ -1,0 +1,513 @@
+# this block are data pipelines
+#   each entry in pipelines: executes a series of functions from top to bottom,
+#   results of prior functions can be used in later calls of the same pipeline
+-
+  action: "add_pipelines"
+  pipelines:
+    slice_field:
+      f1:
+        type: "slice"
+        params:
+          topology: topo
+          point:  {x: 0.0, y: 0.0, z: 0.0}
+          normal: {x: 1.0, y: 1.0, z: 0.0}
+
+    sampled_particles:
+      f1:
+        type: histsampling
+        params:
+          field: particle_plasma_p_uz
+          bins: 64
+          sample_rate: 0.90
+      f2:
+        type: "clip"
+        params:
+          topology: particle_plasma_p # particle data
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    sampled_electrons:
+      f1:
+        type: histsampling
+        params:
+          field: particle_plasma_e_uz
+          bins: 64
+          sample_rate: 0.90
+      f2:
+        type: "clip"
+        params:
+          topology: particle_plasma_e # particle data
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_electrons:
+      f1:
+        type: "clip"
+        params:
+          topology: particle_plasma_e # particle data
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_positrons:
+      f1:
+        type: "clip"
+        params:
+          topology: particle_plasma_p # particle data
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_volume:
+      f0:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.0, y:  0.0, z: 1.0}
+#            point2:  {x: 0.0, y:  0.0, z: 0.0}
+#            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_contour_rho_e:
+      f0:
+        type: "contour"
+        params:
+          field: "rho_plasma_e"
+          levels: 4
+#          iso_values: -0.5e7
+#          iso_values: [-2.0e6]
+      f1:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+#    clipped_contour_rho_e2:
+#      f0:
+#        type: "contour"
+#        params:
+#          field: "rho_electrons2"
+#          levels: 5
+##          iso_values: -0.5e7
+##          iso_values: [-2.0e6]
+#      f1:
+#        type: "clip"
+#        params:
+#          topology: topo # name of the amr mesh
+#          multi_plane:
+#            point1:  {x: 0.0, y:  0.0, z: 0.0}
+#            normal1: {x: 1.0, y:  0.0, z: 0.0}
+#            point2:  {x: 0.0, y:  0.0, z: 0.0}
+#            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+#    clipped_contour_rho_e3:
+#      f0:
+#        type: "contour"
+#        params:
+#          field: "rho_electrons3"
+##          levels: 5
+##          iso_values: -0.5e7
+#          iso_values: [-2.0e6]
+#      f1:
+#        type: "clip"
+#        params:
+#          topology: topo # name of the amr mesh
+#          multi_plane:
+#            point1:  {x: 0.0, y:  0.0, z: 0.0}
+#            normal1: {x: 1.0, y:  0.0, z: 0.0}
+#            point2:  {x: 0.0, y:  0.0, z: 0.0}
+#            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_contour_Ex:
+      f0:
+        type: "contour"
+        params:
+          field: "Ex"
+          levels: 4
+#          iso_values: [-8.0e11, -4.0e11, 4.0e11, 8.0e11]
+      f1:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_contour_Ey:
+      f0:
+        type: "contour"
+        params:
+          field: "Ey"
+#          levels: 4
+          iso_values: [-1.0e12, -5.0e11, 5.0e11, 1.0e12]
+      f1:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+    clipped_contour_Bz:
+      f0:
+        type: "contour"
+        params:
+          field: "Bz"
+#          levels: 4
+          iso_values: [-5.e-9, 5.e-9]
+
+    clipped_contour_Ez:
+      f0:
+        type: "contour"
+        params:
+          field: "Ez"
+#          levels: 4
+          iso_values: [-20., 20.]
+      f1:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.0, y:  1.0, z: 0.0}
+
+    contour_Ey:
+      f0:
+        type: "contour"
+        params:
+          field: "Ey"
+          levels: 2
+#          iso_values: -0.5e7
+#          iso_values: [-1.0e12, 1.0e12]
+
+    mag_clipped_contour_E:
+      f0:
+        type: "composite_vector"
+        params:
+          field1: "Ex"
+          field2: "Ey"
+          field3: "Ez"
+          output_name: "E_vec"
+      f1:
+        type: "vector_magnitude"
+        params: 
+          field: "E_vec"
+          output_name: "E_mag"
+      f2:
+        type: "contour"
+        params:
+          field: "E_mag"
+          levels: 4
+      f3:
+        type: "clip"
+        params:
+          topology: topo # name of the amr mesh
+          multi_plane:
+            point1:  {x: 0.0, y:  0.0, z: 0.0}
+            normal1: {x: 1.0, y:  0.0, z: 0.0}
+            point2:  {x: 0.0, y:  0.0, z: 0.0}
+            normal2: {x: 0.1, y: -0.3, z: 0.0}
+
+# A scene is describes the things to be rendered and how
+#   here one selects either data directly or data that goes into a data pipeline;
+#   then, the result gets represented with a visualization "type" and according
+#   parameters such as colorbars and color ranges (aka transfer functions)
+#   reference:    https://ascent.readthedocs.io/en/latest/Actions/Scenes.html
+#   color tables: https://ascent.readthedocs.io/en/latest/Actions/VTKmColorTables.html
+-
+  action: "add_scenes"
+  scenes:
+    scene1:
+      plots:
+        p_rho:
+          type: "volume"
+          field: "rho"
+#          pipeline: "clipped_volume"
+          max_value:  1.0e-15
+          min_value: -1.0e-15
+#          color_table:
+#            name: "X Ray"
+          color_table:
+            name: "Default"
+            control_points:
+              - { type: "alpha", position: 1.0 , alpha: 0.7 }
+              - { type: "alpha", position: 0.6 , alpha: 0.0 }
+              - { type: "alpha", position: 0.4 , alpha: 0.0 }
+              - { type: "alpha", position: 0.0 , alpha: 0.7 }
+
+#        p1x:
+#          type: "pseudocolor"
+#          field: "Ex"
+#          pipeline: "clipped_contour_Ex"
+#          min_value:  -8.0e11
+#          max_value:   8.0e11
+
+#        p_Bz:
+#          type: "pseudocolor"
+##          type: "volume"
+#          field: "Bz"
+#          pipeline: "clipped_contour_Bz"
+#          min_value: -5.e-9
+#          max_value:  5.e-9
+
+        p_Ez:
+          type: "pseudocolor"
+#          type: "volume"
+          field: "Ez"
+          pipeline: "clipped_contour_Ez"
+          min_value: -20.
+          max_value:  20.
+#          color_table:
+#            name: "Default"
+##            control_points:
+##              - { type: "alpha", position: 1.0 , alpha: 0.5 }
+##              - { type: "alpha", position: 0.6 , alpha: 0.0 }
+##              - { type: "alpha", position: 0.4 , alpha: 0.0 }
+##              - { type: "alpha", position: 0.0 , alpha: 0.5 }
+
+#        p1z:
+#          type: "pseudocolor"
+#          field: "Ez"
+#          pipeline: "clipped_contour_Ez"
+#          min_value:  -3.0e10
+#          max_value:   3.0e10
+
+#          color_table:
+#            name: "plasma"
+#            reverse: true
+#            control_points:
+#              -
+#                type: "alpha"
+#                position: 0.0
+#                alpha: 0.5
+#              -
+#                type: "alpha"
+#                position: 1.0
+#                alpha: 0.5
+
+#        p2:
+#          type: "pseudocolor"
+#          field: "Ey"
+#          pipeline: "contour_Ey"
+#          color_table:
+#            control_points:
+#              -
+#                type: "rgb"
+#                position: 0.0
+#                color: [0.00, 0.50, 0.08]
+#              -
+#                type: "rgb"
+#                position: 0.5
+#                color: [1.00, 1.00, 1.00]
+#              -
+#                type: "rgb"
+#                position: 1.0
+#                color: [1.00, 0.65, 0.00]
+
+#        p_bg_e1:
+#          type: "pseudocolor"
+#          field: "rho_electrons"
+#          pipeline: "clipped_contour_rho_e1"
+#          min_value: -1.0e7
+#          max_value: 0.0
+#          color_table: {name: "X Ray", reverse: true}
+#
+#        p_bg_e2:
+#          type: "pseudocolor"
+#          field: "rho_electrons2"
+#          pipeline: "clipped_contour_rho_e2"
+#          min_value: -1.0e7
+#          max_value: 0.0
+#          color_table: {name: "X Ray", reverse: true}
+
+#        p_bg_e3:
+#          type: "pseudocolor"
+#          field: "rho_electrons3"
+#          pipeline: "clipped_contour_rho_e3"
+#          min_value: -1.0e7
+#          max_value: 0.0
+#          color_table: {name: "X Ray", reverse: true}
+
+#            control_points:
+#              -
+#                type: "alpha"
+#                position: 0.0
+#                alpha: 0.5
+#              -
+#                type: "alpha"
+#                position: 1.0
+#                alpha: 0.5
+
+#        p_v_bg_e1_histsmpl:
+#          type: "pseudocolor"
+#          field: "particle_electrons_ux"  # bugged
+#          pipeline: "sampled_electrons"  # clipped_electrons / sampled_electrons
+#          points: {radius: 2.0e-7}
+##          min_value: 1.0e6  # bug: values seem "stuck" over time
+##          max_value: 1.0e10
+#          color_table: {name: "X Ray"}
+
+#        p_v_bg_e1:
+#          type: "volume"
+#          field: "rho_plasma_e"
+#          pipeline: "clipped_volume"
+#          min_value: -0.4e7
+#          max_value: 0.0
+#          color_table:
+#            name: "X Ray"
+#            control_points:
+#              - { type: "alpha", position: 1.0 , alpha: 0.0 }
+#              - { type: "alpha", position: 0.99, alpha: 0.0 }
+#              - { type: "alpha", position: 0.5 , alpha: 0.7 }
+#              - { type: "alpha", position: 0.0 , alpha: 0.5 }
+
+#              - { type: "rgb", position: 1.0, color: [0.00, 0.00, 0.00]}
+#              - { type: "rgb", position: 0.3, color: [0.90, 0.90, 0.90]}
+#              - { type: "rgb", position: 0.0, color: [0.90, 0.90, 0.90]}
+#            reverse: true
+#            control_points:
+#              - { type: "alpha", position: 1.0, alpha: 0.0 }
+#              - { type: "alpha", position: 0.7, alpha: 0.0 }
+#              - { type: "alpha", position: 0.0, alpha: 0.97 }
+
+#        pEmag:
+#          type: "pseudocolor"
+#          field: "E_mag"
+#          pipeline: "mag_clipped_contour_E"
+#          color_table:
+#            name: "Black-Body Radiation"
+#            reverse: true
+#        pEz_slice:
+#          type: "pseudocolor"
+#          field: "Ez"
+#          pipeline: "slice_field"
+#          min_value: -3.0e11
+#          max_value: 3.0e11
+      renders:
+        image_top:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_top_%06d"
+#          annotations: "false"
+          camera:
+            azimuth: 0
+            elevation: 25
+            #fov: 100
+            zoom: 1.1
+
+        image_front:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_front_%06d"
+#          annotations: "false"
+          camera:
+            azimuth: 0
+            elevation: 80
+            #fov: 100
+            zoom: 1.1
+
+    scene_Bz:
+      plots:
+        p_Bz:
+          type: "pseudocolor"
+          field: "Bz"
+          pipeline: "clipped_contour_Bz"
+          min_value: -5.e-9
+          max_value:  5.e-9
+      renders:
+        image_top:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_Bz_top_%06d"
+          use_original_bounds: "true"
+          camera:
+            azimuth: 0
+            elevation: 25
+            zoom: 1.1
+        image_front:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_Bz_front_%06d"
+          use_original_bounds: "true"
+          camera:
+            azimuth: 0
+            elevation: 80
+            zoom: 1.1
+
+    scene_particles:
+      plots:
+        p_p:
+          type: "pseudocolor"
+          field: "particle_plasma_p_w"
+          #pipeline: "sampled_particles"
+#          points: {radius: 2.0e-7}
+#          min_value: 4.4e9
+#          max_value: 3.3e11
+          color_table:
+            control_points:
+              - { type: "rgb", position: 1.0, color: [0.00, 0.00, 1.00]}
+              - { type: "rgb", position: 0.0, color: [0.00, 0.00, 1.00]}
+
+        p_e:
+          type: "pseudocolor"
+          field: "particle_plasma_e_w"
+          #pipeline: "sampled_particles"
+#          points: {radius: 2.0e-7}
+#          min_value: 4.4e9
+#          max_value: 3.3e11
+          color_table:
+            control_points:
+              - { type: "rgb", position: 1.0, color: [1.00, 0.00, 0.00]}
+              - { type: "rgb", position: 0.0, color: [1.00, 0.00, 0.00]}
+      renders:
+        image_top:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_particles_top_%06d"
+          camera:
+            azimuth: 0
+            elevation: 25
+            zoom: 1.1
+        image_front:
+          image_width: 1440 # 720
+          image_height: 1024 # 512
+          fg_color: [1.0, 1.0, 1.0]
+          bg_color: [0.0, 0.0, 0.0]
+          image_prefix: "./pulsar_particles_front_%06d"
+          camera:
+            azimuth: 0
+            elevation: 80
+            zoom: 1.1
