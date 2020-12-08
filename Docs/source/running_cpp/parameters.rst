@@ -1488,6 +1488,9 @@ In-situ capabilities can be used by turning on Sensei or Ascent (provided they a
 * ``<diag_name>.openpmd_tspf`` (`bool`, optional, default ``true``) only read if ``<diag_name>.format = openpmd``.
     Whether to write one file per timestep.
 
+* ``<diag_name>.write_fields`` (`0` or `1`) optional (default `1`)
+   Whether to write field output or not. For checkpoint format, always set this parameter to ``1``.
+
 * ``<diag_name>.fields_to_plot`` (list of `strings`, optional)
     Fields written to output.
     Possible values: ``Ex`` ``Ey`` ``Ez`` ``Bx`` ``By`` ``Bz`` ``jx`` ``jy`` ``jz`` ``part_per_cell`` ``rho`` ``phi`` ``F`` ``part_per_grid`` ``divE`` ``divB`` and ``rho_<species_name>``, where ``<species_name>`` must match the name of one of the available particle species. Note that ``phi`` will only be written out when do_electrostatic==labframe.

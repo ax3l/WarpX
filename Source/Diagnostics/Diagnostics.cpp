@@ -43,6 +43,18 @@ Diagnostics::BaseReadParameters ()
         m_varnames = {"Ex", "Ey", "Ez", "Bx", "By", "Bz", "jx", "jy", "jz"};
     }
 
+    // default for writing field output is 1
+    int write_fields = 1;
+    pp.query("write_fields", write_fields);
+    if (write_fields == 0) {
+        if (m_format == "checkpoint") {
+            amrex::Abort("For checkpoint format, write_fields flag must be 1.");
+        }
+        // if user-defined value for write_fields == 0, then clear species vector
+        m_varnames.clear();
+        varnames_specified = false;
+    }
+
     // If user requests rho with back-transformed diagnostics, we set plot_rho=true
     // and compute rho at each iteration
     if (WarpXUtilStr::is_in(m_varnames, "rho") && WarpX::do_back_transformed_diagnostics) {
