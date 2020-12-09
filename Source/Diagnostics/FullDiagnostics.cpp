@@ -240,6 +240,8 @@ FullDiagnostics::AddRZModesToOutputNames (const std::string& field, int ncomp){
 
 void
 FullDiagnostics::InitializeFieldBufferData (int i_buffer, int lev ) {
+    if (m_varnames.size() == 0u) return;
+
     auto & warpx = WarpX::GetInstance();
     amrex::RealBox diag_dom;
     bool use_warpxba = true;
@@ -362,6 +364,8 @@ FullDiagnostics::InitializeFieldBufferData (int i_buffer, int lev ) {
 void
 FullDiagnostics::InitializeFieldFunctors (int lev)
 {
+    if (m_varnames.size() == 0u) return;
+
     auto & warpx = WarpX::GetInstance();
 
     // Clear any pre-existing vector to release stored data.
