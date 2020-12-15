@@ -149,10 +149,10 @@ macro(find_amrex)
     endif()
 endmacro()
 
-set(WarpX_amrex_repo "https://github.com/AMReX-Codes/amrex.git"
+set(WarpX_amrex_repo "https://github.com/mic84/amrex.git"
     CACHE STRING
     "Repository URI to pull and build AMReX from if(WarpX_amrex_internal)")
-set(WarpX_amrex_branch "development"
+set(WarpX_amrex_branch "mr/cmake-gpu-backends"
     CACHE STRING
     "Repository branch for WarpX_amrex_repo if(WarpX_amrex_internal)")
 
