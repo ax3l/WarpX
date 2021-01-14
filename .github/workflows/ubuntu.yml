@@ -31,6 +31,7 @@ jobs:
           -DWarpX_openpmd_internal=OFF \
           -DWarpX_PRECISION=SINGLE     \
           -DWarpX_PSATD=ON             \
+          -DWarpX_QED=ON \
           -DAMReX_CUDA_ERROR_CAPTURE_THIS=ON
         cmake --build build_sp -j 2
 
@@ -69,10 +70,10 @@ jobs:
         export CXX=$(which icpc)
         export CC=$(which icc)
 
-        cmake -S . -B build_dp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=OFF -DWarpX_OPENPMD=ON -DWarpX_openpmd_internal=OFF
+        cmake -S . -B build_dp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=OFF -DWarpX_OPENPMD=ON -DWarpX_openpmd_internal=OFF -DWarpX_QED=ON
         cmake --build build_dp -j 2
 
-        cmake -S . -B build_sp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=OFF -DWarpX_OPENPMD=ON -DWarpX_openpmd_internal=OFF -DWarpX_PRECISION=SINGLE
+        cmake -S . -B build_sp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=OFF -DWarpX_OPENPMD=ON -DWarpX_openpmd_internal=OFF -DWarpX_PRECISION=SINGLE -DWarpX_QED=ON
         cmake --build build_sp -j 2
 
         python3 -m pip install --upgrade pip setuptools wheel
@@ -106,6 +107,7 @@ jobs:
           -DCMAKE_VERBOSE_MAKEFILE=ON  \
           -DWarpX_MPI=OFF              \
           -DWarpX_OPENPMD=ON           \
+          -DWarpX_QED=ON \
           -DWarpX_PRECISION=SINGLE
         cmake --build build_sp -j 2
 
@@ -142,6 +144,7 @@ jobs:
           -DWarpX_COMPUTE=SYCL         \
           -DWarpX_MPI=OFF              \
           -DWarpX_OPENPMD=ON           \
+          -DWarpX_QED=ON \
           -DWarpX_PRECISION=SINGLE
         cmake --build build_sp -j 2
 
@@ -168,7 +171,7 @@ jobs:
         export CXX=$(which hipcc)
         export CC=$(which hipcc)
 
-        cmake -S . -B build_sp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=ON -DWarpX_COMPUTE=HIP -DAMReX_AMD_ARCH=gfx900 -DWarpX_OPENPMD=ON -DWarpX_PRECISION=SINGLE
+        cmake -S . -B build_sp -DCMAKE_VERBOSE_MAKEFILE=ON -DWarpX_MPI=ON -DWarpX_COMPUTE=HIP -DAMReX_AMD_ARCH=gfx900 -DWarpX_OPENPMD=ON -DWarpX_PRECISION=SINGLE -DWarpX_QED=ON
         cmake --build build_sp -j 2
 
         PYWARPX_LIB_DIR=$PWD/build_sp/lib python3 -m pip wheel Python/
