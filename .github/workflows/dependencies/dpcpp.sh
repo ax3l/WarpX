@@ -33,4 +33,7 @@ sudo rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/libmkl_sycl.a \
             /opt/intel/oneapi/compiler/latest/linux/lib/emu
 du -sh /opt/intel/oneapi/
 du -sh /opt/intel/oneapi/*/*
+sudo rm -rf /opt/intel/oneapi/mkl/latest/lib/intel64/*.a
+du -sh /opt/intel/oneapi/
+du -sh /opt/intel/oneapi/*/*
 df -h
