@@ -244,7 +244,8 @@ jobs:
           -DWarpX_MPI=ON              \
           -DWarpX_OPENPMD=ON          \
           -DWarpX_PRECISION=SINGLE    \
-          -DWarpX_PSATD=ON
+          -DWarpX_PSATD=ON || { cat ./build_sp/CMakeFiles/CMakeOutput.log; cat ./build_sp/CMakeFiles/CMakeError.log; exit 1; }
+
         cmake --build build_sp -j 2
 
         export WarpX_MPI=ON
