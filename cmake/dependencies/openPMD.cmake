@@ -30,8 +30,9 @@ function(find_openpmd)
 
             if(NOT fetchedopenpmd_POPULATED)
                 FetchContent_Populate(fetchedopenpmd)
-                add_subdirectory(${fetchedopenpmd_SOURCE_DIR} ${fetchedopenpmd_BINARY_DIR})
             endif()
+
+            add_subdirectory(${fetchedopenpmd_SOURCE_DIR} ${fetchedopenpmd_BINARY_DIR})
 
             # advanced fetch options
             mark_as_advanced(FETCHCONTENT_BASE_DIR)

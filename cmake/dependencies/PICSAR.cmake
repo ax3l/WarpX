@@ -49,11 +49,13 @@ function(find_picsar)
 
             if(NOT fetchedpicsar_POPULATED)
                 FetchContent_Populate(fetchedpicsar)
-                add_subdirectory(
-                    ${fetchedpicsar_SOURCE_DIR}/multi_physics/QED
-                    ${fetchedpicsar_BINARY_DIR}
-                )
             endif()
+
+            add_subdirectory(
+                ${fetchedpicsar_SOURCE_DIR}/multi_physics/QED
+                ${fetchedpicsar_BINARY_DIR}
+            )
+
             get_source_version(PXRMP_QED ${fetchedpicsar_SOURCE_DIR})
             if(NOT PXRMP_QED_GIT_VERSION)
                 set(PXRMP_QED_GIT_VERSION "${WarpX_picsar_branch}" CACHE INTERNAL "")

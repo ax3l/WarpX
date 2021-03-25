@@ -104,13 +104,15 @@ macro(find_amrex)
 
             if(NOT fetchedamrex_POPULATED)
                 FetchContent_Populate(fetchedamrex)
-                list(APPEND CMAKE_MODULE_PATH "${fetchedamrex_SOURCE_DIR}/Tools/CMake")
-                if(WarpX_COMPUTE STREQUAL CUDA)
-                    enable_language(CUDA)
-                    include(AMReX_SetupCUDA)
-                endif()
-                add_subdirectory(${fetchedamrex_SOURCE_DIR} ${fetchedamrex_BINARY_DIR})
             endif()
+
+            list(APPEND CMAKE_MODULE_PATH "${fetchedamrex_SOURCE_DIR}/Tools/CMake")
+            if(WarpX_COMPUTE STREQUAL CUDA)
+                enable_language(CUDA)
+                include(AMReX_SetupCUDA)
+            endif()
+
+            add_subdirectory(${fetchedamrex_SOURCE_DIR} ${fetchedamrex_BINARY_DIR})
 
             # advanced fetch options
             mark_as_advanced(FETCHCONTENT_BASE_DIR)
