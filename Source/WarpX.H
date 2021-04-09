@@ -463,20 +463,22 @@ public:
     void UpdateCurrentNodalToStag (amrex::MultiFab& dst, amrex::MultiFab const& src);
 
     // Fill boundary cells including coarse/fine boundaries
-    void FillBoundaryB   (amrex::IntVect ng);
-    void FillBoundaryE   (amrex::IntVect ng);
-    void FillBoundaryB_avg   (amrex::IntVect ng);
-    void FillBoundaryE_avg   (amrex::IntVect ng);
+    void FillBoundaryB   (amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryE   (amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryB_avg   (amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryE_avg   (amrex::IntVect ng, bool blocking=true);
 
-    void FillBoundaryF   (amrex::IntVect ng);
-    void FillBoundaryAux (amrex::IntVect ng);
-    void FillBoundaryE   (int lev, amrex::IntVect ng);
-    void FillBoundaryB   (int lev, amrex::IntVect ng);
-    void FillBoundaryE_avg   (int lev, amrex::IntVect ng);
-    void FillBoundaryB_avg   (int lev, amrex::IntVect ng);
+    void FillBoundaryF   (amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryAux (amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryE   (int lev, amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryB   (int lev, amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryE_avg   (int lev, amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryB_avg   (int lev, amrex::IntVect ng, bool blocking=true);
 
-    void FillBoundaryF   (int lev, amrex::IntVect ng);
-    void FillBoundaryAux (int lev, amrex::IntVect ng);
+    void FillBoundaryF   (int lev, amrex::IntVect ng, bool blocking=true);
+    void FillBoundaryAux (int lev, amrex::IntVect ng, bool blocking=true);
+
+    void FillBoundaryFinish(bool blocking=true);
 
     void SyncCurrent ();
     void SyncRho ();

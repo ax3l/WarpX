@@ -305,8 +305,8 @@ WarpX::OneStep_nosub (Real cur_time)
 
     if (warpx_py_afterdeposition) warpx_py_afterdeposition();
 
-    // Synchronize J and rho
-    SyncCurrent();
+    // Synchronize J and rho // includes also comms!
+    SyncCurrent(); // dominates time in KPP
     SyncRho();
 
     // Apply current correction in Fourier space: for periodic single-box global FFTs
@@ -375,9 +375,10 @@ WarpX::OneStep_nosub (Real cur_time)
                 FillBoundaryF(guard_cells.ng_alloc_F);
                 DampPML();
                 NodalSyncPML();
-                FillBoundaryE(guard_cells.ng_MovingWindow);
-                FillBoundaryF(guard_cells.ng_MovingWindow);
-                FillBoundaryB(guard_cells.ng_MovingWindow);
+                FillBoundaryE(guard_cells.ng_MovingWindow, false);
+                FillBoundaryF(guard_cells.ng_MovingWindow, false);
+                FillBoundaryB(guard_cells.ng_MovingWindow, false);
+                FillBoundaryFinish(false);
             }
             // E and B are up-to-date in the domain, but all guard cells are
             // outdated.

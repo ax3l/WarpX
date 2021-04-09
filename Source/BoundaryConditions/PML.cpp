@@ -818,7 +818,7 @@ PML::GetF_cp ()
 void
 PML::ExchangeB (const std::array<amrex::MultiFab*,3>& B_fp,
                 const std::array<amrex::MultiFab*,3>& B_cp,
-                int do_pml_in_domain)
+                int do_pml_in_domain, bool blocking)
 {
   ExchangeB(PatchType::fine, B_fp, do_pml_in_domain);
   ExchangeB(PatchType::coarse, B_cp, do_pml_in_domain);
@@ -827,7 +827,7 @@ PML::ExchangeB (const std::array<amrex::MultiFab*,3>& B_fp,
 void
 PML::ExchangeB (PatchType patch_type,
                 const std::array<amrex::MultiFab*,3>& Bp,
-                int do_pml_in_domain)
+                int do_pml_in_domain, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_B_fp[0] && Bp[0])
     {
@@ -846,16 +846,16 @@ PML::ExchangeB (PatchType patch_type,
 void
 PML::ExchangeE (const std::array<amrex::MultiFab*,3>& E_fp,
                 const std::array<amrex::MultiFab*,3>& E_cp,
-                int do_pml_in_domain)
+                int do_pml_in_domain, bool blocking)
 {
-    ExchangeE(PatchType::fine, E_fp, do_pml_in_domain);
+     ExchangeE(PatchType::fine, E_fp, do_pml_in_domain);
     ExchangeE(PatchType::coarse, E_cp, do_pml_in_domain);
 }
 
 void
 PML::ExchangeE (PatchType patch_type,
                 const std::array<amrex::MultiFab*,3>& Ep,
-                int do_pml_in_domain)
+                int do_pml_in_domain, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_E_fp[0] && Ep[0])
     {
@@ -873,7 +873,8 @@ PML::ExchangeE (PatchType patch_type,
 
 void
 PML::CopyJtoPMLs (PatchType patch_type,
-                const std::array<amrex::MultiFab*,3>& jp)
+                const std::array<amrex::MultiFab*,3>& jp,
+                bool blocking)
 {
     if (patch_type == PatchType::fine && pml_j_fp[0] && jp[0])
     {
@@ -891,7 +892,8 @@ PML::CopyJtoPMLs (PatchType patch_type,
 
 void
 PML::CopyJtoPMLs (const std::array<amrex::MultiFab*,3>& j_fp,
-                const std::array<amrex::MultiFab*,3>& j_cp)
+                const std::array<amrex::MultiFab*,3>& j_cp,
+                bool /* blocking */)
 {
     CopyJtoPMLs(PatchType::fine, j_fp);
     CopyJtoPMLs(PatchType::coarse, j_cp);
@@ -899,26 +901,26 @@ PML::CopyJtoPMLs (const std::array<amrex::MultiFab*,3>& j_fp,
 
 
 void
-PML::ExchangeF (amrex::MultiFab* F_fp, amrex::MultiFab* F_cp, int do_pml_in_domain)
+PML::ExchangeF (amrex::MultiFab* F_fp, amrex::MultiFab* F_cp, int do_pml_in_domain, bool blocking)
 {
-    ExchangeF(PatchType::fine, F_fp, do_pml_in_domain);
-    ExchangeF(PatchType::coarse, F_cp, do_pml_in_domain);
+    ExchangeF(PatchType::fine, F_fp, do_pml_in_domain, blocking);
+    ExchangeF(PatchType::coarse, F_cp, do_pml_in_domain, blocking);
 }
 
 void
-PML::ExchangeF (PatchType patch_type, amrex::MultiFab* Fp, int do_pml_in_domain)
+PML::ExchangeF (PatchType patch_type, amrex::MultiFab* Fp, int do_pml_in_domain, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_F_fp && Fp) {
-        Exchange(*pml_F_fp, *Fp, *m_geom, do_pml_in_domain);
+        Exchange(*pml_F_fp, *Fp, *m_geom, do_pml_in_domain, blocking);
     } else if (patch_type == PatchType::coarse && pml_F_cp && Fp) {
-        Exchange(*pml_F_cp, *Fp, *m_cgeom, do_pml_in_domain);
+        Exchange(*pml_F_cp, *Fp, *m_cgeom, do_pml_in_domain, blocking);
     }
 }
 
 
 void
 PML::Exchange (MultiFab& pml, MultiFab& reg, const Geometry& geom,
-                int do_pml_in_domain)
+                int do_pml_in_domain, bool /* blocking */)
 {
     WARPX_PROFILE("PML::Exchange");
 
@@ -941,7 +943,9 @@ PML::Exchange (MultiFab& pml, MultiFab& reg, const Geometry& geom,
     if (do_pml_in_domain){
         // Valid cells of the PML and of the regular grid overlap
         // Copy from valid cells of the PML to valid cells of the regular grid
-        reg.ParallelCopy(totpmlmf, 0, 0, 1, IntVect(0), IntVect(0), period);
+        //reg.ParallelCopy(totpmlmf, 0, 0, 1, IntVect(0), IntVect(0), period);
+        reg.ParallelCopy_nowait(totpmlmf, 0, 0, 1, IntVect(0), IntVect(0), period);
+        reg.ParallelCopy_finish(); // ATTENTION: THE SAME MULTIFAB cannot be FillBoundary'd and ParallelCopy'd
     } else {
         // Valid cells of the PML only overlap with guard cells of regular grid
         // (and outermost valid cell of the regular grid, for nodal direction)
@@ -998,80 +1002,145 @@ PML::CopyToPML (MultiFab& pml, MultiFab& reg, const Geometry& geom)
 }
 
 void
-PML::FillBoundary ()
+PML::FillBoundary (bool blocking)
 {
-    FillBoundaryE();
-    FillBoundaryB();
-    FillBoundaryF();
+    // overwrite like a boss:
+    blocking = false;
+
+    FillBoundaryE(blocking);
+    FillBoundaryB(blocking);
+    FillBoundaryF(blocking);
+
+    FillBoundaryFinish(blocking);
 }
 
 void
-PML::FillBoundaryE ()
+PML::FillBoundaryFinish(bool blocking)
 {
-    FillBoundaryE(PatchType::fine);
-    FillBoundaryE(PatchType::coarse);
+    if ( blocking ) return;
+
+    pml_E_fp[0].get()->FillBoundary_finish();
+    pml_E_fp[1].get()->FillBoundary_finish();
+    pml_E_fp[2].get()->FillBoundary_finish();
+    pml_E_cp[0].get()->FillBoundary_finish();
+    pml_E_cp[1].get()->FillBoundary_finish();
+    pml_E_cp[2].get()->FillBoundary_finish();
+
+    pml_B_fp[0].get()->FillBoundary_finish();
+    pml_B_fp[1].get()->FillBoundary_finish();
+    pml_B_fp[2].get()->FillBoundary_finish();
+    pml_B_cp[0].get()->FillBoundary_finish();
+    pml_B_cp[1].get()->FillBoundary_finish();
+    pml_B_cp[2].get()->FillBoundary_finish();
+
+    pml_F_fp->FillBoundary_finish();
 }
 
 void
-PML::FillBoundaryE (PatchType patch_type)
+PML::FillBoundaryE (bool blocking)
+{
+    FillBoundaryE(PatchType::fine, blocking);
+    FillBoundaryE(PatchType::coarse, blocking);
+}
+
+void
+PML::FillBoundaryE (PatchType patch_type, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_E_fp[0] && pml_E_fp[0]->nGrowVect().max() > 0)
     {
         const auto& period = m_geom->periodicity();
-        Vector<MultiFab*> mf{pml_E_fp[0].get(),pml_E_fp[1].get(),pml_E_fp[2].get()};
-        amrex::FillBoundary(mf, period);
+
+        if (blocking) {
+            Vector<MultiFab*> mf{pml_E_fp[0].get(),pml_E_fp[1].get(),pml_E_fp[2].get()};
+            amrex::FillBoundary(mf, period);
+        } else {
+            pml_E_fp[0].get()->FillBoundary_nowait(period);
+            pml_E_fp[1].get()->FillBoundary_nowait(period);
+            pml_E_fp[2].get()->FillBoundary_nowait(period);
+        }
     }
     else if (patch_type == PatchType::coarse && pml_E_cp[0] && pml_E_cp[0]->nGrowVect().max() > 0)
     {
         const auto& period = m_cgeom->periodicity();
-        Vector<MultiFab*> mf{pml_E_cp[0].get(),pml_E_cp[1].get(),pml_E_cp[2].get()};
-        amrex::FillBoundary(mf, period);
+
+        if (blocking) {
+            Vector<MultiFab *> mf{pml_E_cp[0].get(), pml_E_cp[1].get(), pml_E_cp[2].get()};
+            amrex::FillBoundary(mf, period);
+        } else {
+            pml_E_cp[0].get()->FillBoundary_nowait(period);
+            pml_E_cp[1].get()->FillBoundary_nowait(period);
+            pml_E_cp[2].get()->FillBoundary_nowait(period);
+        }
     }
 }
 
 void
-PML::FillBoundaryB ()
+PML::FillBoundaryB (bool blocking)
 {
-    FillBoundaryB(PatchType::fine);
-    FillBoundaryB(PatchType::coarse);
+    FillBoundaryB(PatchType::fine, blocking);
+    FillBoundaryB(PatchType::coarse, blocking);
 }
 
 void
-PML::FillBoundaryB (PatchType patch_type)
+PML::FillBoundaryB (PatchType patch_type, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_B_fp[0])
     {
         const auto& period = m_geom->periodicity();
-        Vector<MultiFab*> mf{pml_B_fp[0].get(),pml_B_fp[1].get(),pml_B_fp[2].get()};
-        amrex::FillBoundary(mf, period);
+
+        if (blocking) {
+            Vector<MultiFab *> mf{pml_B_fp[0].get(), pml_B_fp[1].get(), pml_B_fp[2].get()};
+            amrex::FillBoundary(mf, period);
+        } else {
+            pml_B_fp[0].get()->FillBoundary_nowait(period);
+            pml_B_fp[1].get()->FillBoundary_nowait(period);
+            pml_B_fp[2].get()->FillBoundary_nowait(period);
+        }
     }
     else if (patch_type == PatchType::coarse && pml_B_cp[0])
     {
         const auto& period = m_cgeom->periodicity();
-        Vector<MultiFab*> mf{pml_B_cp[0].get(),pml_B_cp[1].get(),pml_B_cp[2].get()};
-        amrex::FillBoundary(mf, period);
+
+        if (blocking) {
+            Vector<MultiFab *> mf{pml_B_cp[0].get(), pml_B_cp[1].get(), pml_B_cp[2].get()};
+            amrex::FillBoundary(mf, period);
+        } else {
+            pml_B_cp[0].get()->FillBoundary_nowait(period);
+            pml_B_cp[1].get()->FillBoundary_nowait(period);
+            pml_B_cp[2].get()->FillBoundary_nowait(period);
+        }
     }
 }
 
 void
-PML::FillBoundaryF ()
+PML::FillBoundaryF (bool blocking)
 {
-    FillBoundaryF(PatchType::fine);
-    FillBoundaryF(PatchType::coarse);
+    FillBoundaryF(PatchType::fine, blocking);
+    FillBoundaryF(PatchType::coarse, blocking);
 }
 
 void
-PML::FillBoundaryF (PatchType patch_type)
+PML::FillBoundaryF (PatchType patch_type, bool blocking)
 {
     if (patch_type == PatchType::fine && pml_F_fp && pml_F_fp->nGrowVect().max() > 0)
     {
         const auto& period = m_geom->periodicity();
-        pml_F_fp->FillBoundary(period);
+
+        if (blocking) {
+            pml_F_fp->FillBoundary(period);
+        } else {
+            pml_F_fp->FillBoundary_nowait(period);
+        }
     }
     else if (patch_type == PatchType::coarse && pml_F_cp && pml_F_cp->nGrowVect().max() > 0)
     {
         const auto& period = m_cgeom->periodicity();
-        pml_F_cp->FillBoundary(period);
+
+        if (blocking) {
+            pml_F_cp->FillBoundary(period);
+        } else {
+            pml_F_cp->FillBoundary_nowait(period);
+        }
     }
 }
 

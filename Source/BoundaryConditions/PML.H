@@ -131,37 +131,38 @@ public:
 #endif
 
     void ExchangeB (const std::array<amrex::MultiFab*,3>& B_fp,
-                    const std::array<amrex::MultiFab*,3>& B_cp, int do_pml_in_domain);
+                    const std::array<amrex::MultiFab*,3>& B_cp, int do_pml_in_domain, bool blocking = true);
     void ExchangeE (const std::array<amrex::MultiFab*,3>& E_fp,
-                    const std::array<amrex::MultiFab*,3>& E_cp, int do_pml_in_domain);
+                    const std::array<amrex::MultiFab*,3>& E_cp, int do_pml_in_domain, bool blocking = true);
     void CopyJtoPMLs (const std::array<amrex::MultiFab*,3>& j_fp,
-                    const std::array<amrex::MultiFab*,3>& j_cp);
+                    const std::array<amrex::MultiFab*,3>& j_cp, bool blocking = true);
 
     void ExchangeB (PatchType patch_type,
-                    const std::array<amrex::MultiFab*,3>& Bp, int do_pml_in_domain);
+                    const std::array<amrex::MultiFab*,3>& Bp, int do_pml_in_domain, bool blocking = true);
     void ExchangeE (PatchType patch_type,
-                    const std::array<amrex::MultiFab*,3>& Ep, int do_pml_in_domain);
+                    const std::array<amrex::MultiFab*,3>& Ep, int do_pml_in_domain, bool blocking = true);
 
     void CopyJtoPMLs (PatchType patch_type,
-                    const std::array<amrex::MultiFab*,3>& jp);
+                    const std::array<amrex::MultiFab*,3>& jp, bool blocking = true);
 
-    void ExchangeF (amrex::MultiFab* F_fp, amrex::MultiFab* F_cp, int do_pml_in_domain);
-    void ExchangeF (PatchType patch_type, amrex::MultiFab* Fp, int do_pml_in_domain);
+    void ExchangeF (amrex::MultiFab* F_fp, amrex::MultiFab* F_cp, int do_pml_in_domain, bool blocking = true);
+    void ExchangeF (PatchType patch_type, amrex::MultiFab* Fp, int do_pml_in_domain, bool blocking = true);
 
-    void FillBoundary ();
-    void FillBoundaryE ();
-    void FillBoundaryB ();
-    void FillBoundaryF ();
-    void FillBoundaryE (PatchType patch_type);
-    void FillBoundaryB (PatchType patch_type);
-    void FillBoundaryF (PatchType patch_type);
+    void FillBoundary (bool blocking = true);
+    void FillBoundaryE (bool blocking = true);
+    void FillBoundaryB (bool blocking = true);
+    void FillBoundaryF (bool blocking = true);
+    void FillBoundaryE (PatchType patch_type, bool blocking = true);
+    void FillBoundaryB (PatchType patch_type, bool blocking = true);
+    void FillBoundaryF (PatchType patch_type, bool blocking = true);
+    void FillBoundaryFinish(bool blocking = true);
 
     bool ok () const { return m_ok; }
 
     void CheckPoint (const std::string& dir) const;
     void Restart (const std::string& dir);
 
-    static void Exchange (amrex::MultiFab& pml, amrex::MultiFab& reg, const amrex::Geometry& geom, int do_pml_in_domain);
+    static void Exchange (amrex::MultiFab& pml, amrex::MultiFab& reg, const amrex::Geometry& geom, int do_pml_in_domain, bool blocking = true);
 
 private:
     bool m_ok;

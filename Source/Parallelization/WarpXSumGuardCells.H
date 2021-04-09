@@ -33,7 +33,7 @@ WarpXSumGuardCells(amrex::MultiFab& mf, const amrex::Periodicity& period,
         n_updated_guards = mf.nGrowVect();
     else  // Update only the valid cells
         n_updated_guards = amrex::IntVect::TheZeroVector();
-    mf.SumBoundary(icomp, ncomp, n_updated_guards, period);
+    mf.SumBoundary(icomp, ncomp, n_updated_guards, period); // needs async version in AMReX
 }
 
 /** \brief Sum the values of `src` where the different boxes overlap
@@ -64,8 +64,8 @@ WarpXSumGuardCells(amrex::MultiFab& dst, amrex::MultiFab& src,
     else  // Update only the valid cells
         n_updated_guards = amrex::IntVect::TheZeroVector();
 
-    src.SumBoundary(0, ncomp, n_updated_guards, period);
-    amrex::Copy( dst, src, 0, icomp, ncomp, n_updated_guards );
+    src.SumBoundary_nowait(0, ncomp, n_updated_guards, period);
+    amrex::Copy( dst, src, 0, icomp, ncomp, n_updated_guards ); // move out for nowait
 }
 
 #endif // WARPX_SUM_GUARD_CELLS_H_

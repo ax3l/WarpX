@@ -430,60 +430,60 @@ void WarpX::UpdateCurrentNodalToStag (amrex::MultiFab& dst, amrex::MultiFab cons
 }
 
 void
-WarpX::FillBoundaryB (IntVect ng)
+WarpX::FillBoundaryB (IntVect ng, bool blocking)
 {
     for (int lev = 0; lev <= finest_level; ++lev)
     {
-        FillBoundaryB(lev, ng);
+        FillBoundaryB(lev, ng, blocking);
     }
 }
 
 void
-WarpX::FillBoundaryE (IntVect ng)
+WarpX::FillBoundaryE (IntVect ng, bool blocking)
 {
     for (int lev = 0; lev <= finest_level; ++lev)
     {
-        FillBoundaryE(lev, ng);
+        FillBoundaryE(lev, ng, blocking);
     }
 }
 
 void
-WarpX::FillBoundaryF (IntVect ng)
+WarpX::FillBoundaryF (IntVect ng, bool blocking)
 {
     for (int lev = 0; lev <= finest_level; ++lev)
     {
-        FillBoundaryF(lev, ng);
+        FillBoundaryF(lev, ng, blocking);
     }
 }
 
 void
-WarpX::FillBoundaryB_avg (IntVect ng)
+WarpX::FillBoundaryB_avg (IntVect ng, bool blocking)
 {
     for (int lev = 0; lev <= finest_level; ++lev)
     {
-        FillBoundaryB_avg(lev, ng);
+        FillBoundaryB_avg(lev, ng, blocking);
     }
 }
 
 void
-WarpX::FillBoundaryE_avg (IntVect ng)
+WarpX::FillBoundaryE_avg (IntVect ng, bool blocking)
 {
     for (int lev = 0; lev <= finest_level; ++lev)
     {
-        FillBoundaryE_avg(lev, ng);
+        FillBoundaryE_avg(lev, ng, blocking);
     }
 }
 
 
 void
-WarpX::FillBoundaryE(int lev, IntVect ng)
+WarpX::FillBoundaryE(int lev, IntVect ng, bool blocking)
 {
-    FillBoundaryE(lev, PatchType::fine, ng);
-    if (lev > 0) FillBoundaryE(lev, PatchType::coarse, ng);
+    FillBoundaryE(lev, PatchType::fine, ng, blocking);
+    if (lev > 0) FillBoundaryE(lev, PatchType::coarse, ng, blocking);
 }
 
 void
-WarpX::FillBoundaryE (int lev, PatchType patch_type, IntVect ng)
+WarpX::FillBoundaryE (int lev, PatchType patch_type, IntVect ng, bool blocking)
 {
     if (patch_type == PatchType::fine)
     {
@@ -494,7 +494,7 @@ WarpX::FillBoundaryE (int lev, PatchType patch_type, IntVect ng)
                                   Efield_fp[lev][1].get(),
                                   Efield_fp[lev][2].get() },
                                 do_pml_in_domain);
-            pml[lev]->FillBoundaryE(patch_type);
+            pml[lev]->FillBoundaryE(patch_type, blocking);
         }
 
         const auto& period = Geom(lev).periodicity();
@@ -720,6 +720,7 @@ WarpX::FillBoundaryF (int lev, PatchType patch_type, IntVect ng)
             pml[lev]->ExchangeF(patch_type, F_fp[lev].get(),
                                 do_pml_in_domain);
             pml[lev]->FillBoundaryF(patch_type);
+            // finish
         }
 
         const auto& period = Geom(lev).periodicity();
@@ -772,6 +773,12 @@ WarpX::FillBoundaryAux (int lev, IntVect ng)
     Bfield_aux[lev][0]->FillBoundary(ng, period);
     Bfield_aux[lev][1]->FillBoundary(ng, period);
     Bfield_aux[lev][2]->FillBoundary(ng, period);
+}
+
+void
+WarpX::FillBoundaryFinish (bool blocking)
+{
+    // ...
 }
 
 void
@@ -886,6 +893,9 @@ WarpX::ApplyFilterandSumBoundaryJ (int lev, PatchType patch_type)
             WarpXSumGuardCells(*(j[idim]), period, 0, (j[idim])->nComp());
         }
     }
+    // finish component
+    // copy component
+    // next component
 }
 
 /* /brief Update the currents of `lev` by adding the currents from particles
@@ -959,14 +969,14 @@ WarpX::AddCurrentFromFineLevelandSumBoundary (int lev)
             {
                 mf.ParallelAdd(*current_cp[lev+1][idim], 0, 0, current_cp[lev+1][idim]->nComp(),
                                current_cp[lev+1][idim]->nGrowVect(), IntVect::TheZeroVector(),
-                               period);
+                               period); // unconditional always with MR
                 WarpXSumGuardCells(*(current_cp[lev+1][idim]), period, 0, current_cp[lev+1][idim]->nComp());
             }
             MultiFab::Add(*current_fp[lev][idim], mf, 0, 0, current_fp[lev+1][idim]->nComp(), 0);
         }
-        NodalSyncJ(lev+1, PatchType::coarse);
+        NodalSyncJ(lev+1, PatchType::coarse); // parallel, only MR
     }
-    NodalSyncJ(lev, PatchType::fine);
+    NodalSyncJ(lev, PatchType::fine); // parallel always
 }
 
 void
