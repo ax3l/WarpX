@@ -40,6 +40,7 @@ From the base of the WarpX source directory, execute:
 
    # find dependencies & configure
    #   see additional options below, e.g.
+   #                   -DWarpX_PYTHON=ON
    #                   -DCMAKE_INSTALL_PREFIX=$HOME/sw/warpx
    cmake -S . -B build
 
@@ -64,11 +65,11 @@ You can inspect and modify build options after running ``cmake -S . -B build`` w
    ccmake build
 
 or by adding arguments with ``-D<OPTION>=<VALUE>`` to the first CMake call.
-For example, this builds WarpX in 2D geometry and enables Nvidia GPU (CUDA) support:
+For example, this builds WarpX in 2D geometry and enables Python bindings and Nvidia GPU (CUDA) support:
 
 .. code-block:: bash
 
-   cmake -S . -B build -DWarpX_DIMS=2 -DWarpX_COMPUTE=CUDA
+   cmake -S . -B build -DWarpX_DIMS=2 -DWarpX_PYTHON=ON -DWarpX_COMPUTE=CUDA
 
 
 .. _building-cmake-options:
@@ -90,13 +91,14 @@ CMake Option                  Default & Values                             Descr
 ``WarpX_EB``                  ON/**OFF**                                   Embedded boundary support (not supported in RZ yet)
 ``WarpX_GPUCLOCK``            **ON**/OFF                                   Add GPU kernel timers (cost function, +4 registers/kernel)
 ``WarpX_IPO``                 ON/**OFF**                                   Compile WarpX with interprocedural optimization (aka LTO)
-``WarpX_LIB``                 ON/**OFF**                                   Build WarpX as a shared library, e.g., for PICMI Python
+``WarpX_LIB``                 ON/**OFF**                                   Build WarpX as a library, e.g., for PICMI Python
 ``WarpX_MPI``                 **ON**/OFF                                   Multi-node support (message-passing)
 ``WarpX_MPI_THREAD_MULTIPLE`` **ON**/OFF                                   MPI thread-multiple support, i.e. for ``async_io``
 ``WarpX_OPENPMD``             **ON**/OFF                                   openPMD I/O (HDF5, ADIOS)
 ``WarpX_PRECISION``           SINGLE/**DOUBLE**                            Floating point precision (single/double)
 ``WarpX_PARTICLE_PRECISION``  SINGLE/**DOUBLE**                            Particle floating point precision (single/double), defaults to WarpX_PRECISION value if not set
 ``WarpX_PSATD``               ON/**OFF**                                   Spectral solver
+``WarpX_PYTHON``              ON/**OFF**                                   Python bindings
 ``WarpX_QED``                 **ON**/OFF                                   QED support (requires PICSAR)
 ``WarpX_QED_TABLE_GEN``       ON/**OFF**                                   QED table generation support (requires PICSAR and Boost)
 ``WarpX_SENSEI``              ON/**OFF**                                   SENSEI in situ visualization
@@ -127,6 +129,14 @@ CMake Option                  Default & Values                               Des
 ``WarpX_picsar_repo``         ``https://github.com/ECP-WarpX/picsar.git``    Repository URI to pull and build PICSAR from
 ``WarpX_picsar_branch``       *we set and maintain a compatible commit*      Repository branch for ``WarpX_picsar_repo``
 ``WarpX_picsar_internal``     **ON**/OFF                                     Needs a pre-installed PICSAR library if set to ``OFF``
+``WarpX_pyamrex_src``        *None*                                          Path to PICSAR source directory (preferred if set)
+``WarpX_pyamrex_repo``        ``https://github.com/AMReX-Codes/pyamrex.git`` Repository URI to pull and build pyAMReX from
+``WarpX_pyamrex_branch``      *we set and maintain a compatible commit*      Repository branch for ``WarpX_pyamrex_repo``
+``WarpX_pyamrex_internal``    **ON**/OFF                                     Needs a pre-installed pyAMReX library if set to ``OFF``
+``WarpX_pybind11_src``        *None*                                         Path to pybind11 source directory (preferred if set)
+``WarpX_pybind11_repo``       ``https://github.com/pybind/pybind11.git``     Repository URI to pull and build pybind11 from
+``WarpX_pybind11_branch``     *we set and maintain a compatible commit*      Repository branch for ``WarpX_pybind11_repo``
+``WarpX_pybind11_internal``   **ON**/OFF                                     Needs a pre-installed pybind11 library if set to ``OFF``
 ============================= ============================================== ===========================================================
 
 For example, one can also build against a local AMReX copy.
@@ -201,13 +211,14 @@ PICMI Python Bindings
 
       python3 -m pip install -U pip setuptools wheel
       python3 -m pip install -U cmake
+      python3 -m pip install -r requirements.txt
 
 For PICMI Python bindings, configure WarpX to produce a library and call our ``pip_install`` *CMake target*:
 
 .. code-block:: bash
 
    # find dependencies & configure
-   cmake -S . -B build -DWarpX_LIB=ON
+   cmake -S . -B build -DWarpX_PYTHON=ON
 
    # build and then call "python3 -m pip install ..."
    cmake --build build --target pip_install -j 4
@@ -220,7 +231,7 @@ Developers could now change the WarpX source code and then call the build line a
 .. note::
 
    These commands build one ``-DWarpX_DIMS=...`` dimensionality (default: ``3``) at a time.
-   If your ``build/lib*/`` directory contains previously built ``libwarpx*`` libraries, then ``--target pip_install`` picks them up as well.
+   If your ``build/`` directory contains previously built Python modules, then ``--target pip_install`` picks them up as well.
    A new call to ``cmake --build build ...`` will only rebuild *one* dimensionality, as set via ``WarpX_DIMS``.
 
 If you like to build a WarpX Python package that supports *all* dimensionalities, you can run this:
@@ -228,7 +239,7 @@ If you like to build a WarpX Python package that supports *all* dimensionalities
 .. code-block:: bash
 
    for d in 1 2 3 RZ; do
-       cmake -S . -B build -DWarpX_DIMS=$d -DWarpX_LIB=ON
+       cmake -S . -B build -DWarpX_DIMS=$d -DWarpX_PYTHON=ON
        cmake --build build -j 4
    done
    cmake --build build --target pip_install
@@ -283,6 +294,10 @@ Environment Variable          Default & Values                             Descr
 ``WARPX_OPENPMD_INTERNAL``    **ON**/OFF                                   Needs a pre-installed openPMD-api library if set to ``OFF``
 ``WARPX_PICSAR_SRC``          *None*                                       Absolute path to PICSAR source directory (preferred if set)
 ``WARPX_PICSAR_INTERNAL``     **ON**/OFF                                   Needs a pre-installed PICSAR library if set to ``OFF``
+``WARPX_PYAMREX_SRC``         *None*                                       Absolute path to pyAMReX source directory (preferred if set)
+``WARPX_PYAMREX_INTERNAL``    **ON**/OFF                                   Needs a pre-installed pyAMReX library if set to ``OFF``
+``WARPX_PYBIND11_SRC``        *None*                                       Absolute path to pybind11 source directory (preferred if set)
+``WARPX_PYBIND11_INTERNAL``   **ON**/OFF                                   Needs a pre-installed pybind11 library if set to ``OFF``
 ``WARPX_CCACHE_PROGRAM``      First found ``ccache`` executable.           Set to ``NO`` to disable CCache.
 ``PYWARPX_LIB_DIR``           *None*                                       If set, search for pre-built WarpX C++ libraries (see below)
 ============================= ============================================ ================================================================
@@ -320,7 +335,7 @@ If the C++ libraries are already pre-compiled, we can pick them up in the Python
 
    # build WarpX executables and libraries
    for d in 1 2 3 RZ; do
-     cmake -S . -B build -DWarpX_DIMS=$d -DWarpX_LIB=ON
+     cmake -S . -B build -DWarpX_DIMS=$d -DWarpX_PYTHON=ON
      cmake --build build -j 4
    done
 
