@@ -46,6 +46,12 @@ void init_WarpX (py::module& m)
             //py::overload_cast< int >(&ImpactX::boxArray, py::const_),
             py::arg("lev")
         )
+        .def("Ex_aux",
+            [](WarpX const & ix, int const lev) { return ix.get_pointer_Efield_aux(lev, 0); },
+            py::arg("lev"),
+            py::return_value_policy::reference_internal,
+            "Auxilliary Ex MultiFab"
+        )
     ;
 
     py::class_<warpx::Config>(m, "Config")
