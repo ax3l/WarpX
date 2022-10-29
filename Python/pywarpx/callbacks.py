@@ -99,9 +99,7 @@ class CallbackFunctions(object):
     def clearlist(self):
         """Unregister/clear out all registered C callbacks"""
         self.funcs = []
-        libwarpx.libwarpx_so.warpx_clear_callback_py(
-            ctypes.c_char_p(self.name.encode('utf-8'))
-        )
+        libwarpx.libwarpx_so.remove_python_callback(self.name)
 
     def __bool__(self):
         """Returns True if functions are installed, otherwise False"""
@@ -165,12 +163,7 @@ class CallbackFunctions(object):
         if len(self.funcs) == 0:
             # If this is the first function installed, set the callback in the C++
             # to call this class instance.
-            # Note that the _c_func must be saved.
-            _CALLBACK_FUNC_0 = ctypes.CFUNCTYPE(None)
-            self._c_func = _CALLBACK_FUNC_0(self)
-            libwarpx.libwarpx_so.warpx_set_callback_py(
-                ctypes.c_char_p(self.name.encode('utf-8')), self._c_func
-            )
+            libwarpx.libwarpx_so.add_python_callback(self.name, self)
         if isinstance(f,types.MethodType):
             # --- If the function is a method of a class instance, then save a full
             # --- reference to that instance and the method name.

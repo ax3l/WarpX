@@ -6,6 +6,8 @@
  * Authors: Axel Huebl
  * License: BSD-3-Clause-LBNL
  */
+#include "WarpX_py.H"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>

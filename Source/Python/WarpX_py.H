@@ -6,7 +6,7 @@
  *
  * License: BSD-3-Clause-LBNL
  */
-//#include "WarpXWrappers.H"
+
 #include "Utils/WarpXProfilerWrapper.H"
 
 #include <map>
@@ -16,20 +16,27 @@
  * Declare global map to hold python callback functions.
  *
  * The keys of the map describe at what point in the simulation the python
- * functions will be called. Currently supported keys (callback points) are
- * afterinit, beforecollisions, aftercollisions, beforeEsolve, poissonsolver,
- * afterEsolve, beforedeposition, afterdeposition, particlescraper,
- * particleloader, beforestep, afterstep, afterdiagnostics, afterrestart,
- * oncheckpointsignal, particleinjection and appliedfields.
+ * functions will be called. See ``WarpX/Python/pywarpx/callbacks.py`` for a
+ * list of currently supported callback names.
 */
-extern std::map< std::string, std::function<()> > warpx_callback_py_map;
+extern std::map< std::string, std::function<void()> > warpx_callback_py_map;
+
+/**
+ * \brief Function to install the given name and function in warpx_callback_py_map
+ */
+void InstallPythonCallback ( std::string name, std::function<void()> callback );
 
 /**
  * \brief Function to check if the given name is a key in warpx_callback_py_map
  */
-bool IsPythonCallBackInstalled ( std::string name );
+bool IsPythonCallbackInstalled ( std::string name );
 
 /**
  * \brief Function to look for and execute Python callbacks
  */
 void ExecutePythonCallback ( std::string name );
+
+/**
+ * \brief Function to clear the given callback name from warpx_callback_py_map
+ */
+void ClearPythonCallback ( std::string name );
