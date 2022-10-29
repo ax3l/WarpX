@@ -1,14 +1,12 @@
-/* Copyright 2019 David Grote, Maxence Thevenet, Weiqun Zhang
- *
+/* Copyright 2019-2022 The WarpX Community
  *
  * This file is part of WarpX.
  *
+ * Authors: David Grote, Maxence Thevenet, Weiqun Zhang, Roelof Groenewald
+ *
  * License: BSD-3-Clause-LBNL
  */
-#ifndef WARPX_PY_H_
-#define WARPX_PY_H_
-
-#include "WarpXWrappers.H"
+//#include "WarpXWrappers.H"
 #include "Utils/WarpXProfilerWrapper.H"
 
 #include <map>
@@ -24,7 +22,7 @@
  * particleloader, beforestep, afterstep, afterdiagnostics, afterrestart,
  * oncheckpointsignal, particleinjection and appliedfields.
 */
-extern std::map< std::string, WARPX_CALLBACK_PY_FUNC_0 > warpx_callback_py_map;
+extern std::map< std::string, std::function<()> > warpx_callback_py_map;
 
 /**
  * \brief Function to check if the given name is a key in warpx_callback_py_map
@@ -35,5 +33,3 @@ bool IsPythonCallBackInstalled ( std::string name );
  * \brief Function to look for and execute Python callbacks
  */
 void ExecutePythonCallback ( std::string name );
-
-#endif
