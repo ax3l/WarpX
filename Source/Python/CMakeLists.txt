@@ -4,7 +4,7 @@
 #
 target_sources(WarpX
   PRIVATE
-    WarpX_py.cpp  # TODO: modernize via https://pybind11.readthedocs.io/en/stable/advanced/cast/functional.html
+    WarpX_py.cpp
 )
 target_sources(pyWarpX
   PRIVATE

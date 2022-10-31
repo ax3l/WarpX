@@ -16,7 +16,7 @@ The following three functions allow the user to install, uninstall and verify
 the different call back types.
  - installcallback: Installs a function to be called at that specified time
  - uninstallcallback: Uninstalls the function (so it won't be called anymore)
-  - isinstalled: Checks if the function is installed
+ - isinstalled: Checks if the function is installed
 
 These functions all take a callback location name (string) and function or
 instance method as an argument. Note that if an instance method is used, an
@@ -141,7 +141,7 @@ class CallbackFunctions(object):
             if not callable(result):
                 print("\n\nWarning: a call back was found that is not callable.")
                 if self.name is not None:
-                    print(f"For {self.name}")
+                    print("For %s"%self.name)
                 print("Only callable objects can be installed.")
                 print("It is possible that the callable's name has been overwritten")
                 print("by something not callable. This can happen during restart")

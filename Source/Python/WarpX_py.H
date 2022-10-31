@@ -6,6 +6,8 @@
  *
  * License: BSD-3-Clause-LBNL
  */
+#ifndef WARPX_PY_H_
+#define WARPX_PY_H_
 
 #include "Utils/WarpXProfilerWrapper.H"
 
@@ -40,3 +42,5 @@ void ExecutePythonCallback ( std::string name );
  * \brief Function to clear the given callback name from warpx_callback_py_map
  */
 void ClearPythonCallback ( std::string name );
+
+#endif
