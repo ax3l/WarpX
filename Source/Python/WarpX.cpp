@@ -51,7 +51,7 @@ void init_WarpX (py::module& m)
                 if (ix.multifab_map.count(multifab_name) > 0) {
                     return ix.multifab_map.at(multifab_name);
                 } else {
-                    throw std::runtime_error("The MultiFab '" + multifab_name + "' is unknown or is not allocated!")
+                    throw std::runtime_error("The MultiFab '" + multifab_name + "' is unknown or is not allocated!");
                 }
             },
             py::arg("multifab_name"),
