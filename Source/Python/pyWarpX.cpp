@@ -69,4 +69,8 @@ PYBIND11_MODULE(PYWARPX_MODULE_NAME, m) {
     // auto numpy = py::module::import("numpy");
     // auto npversion = numpy.attr("__version__");
     // std::cout << "numpy version: " << py::str(npversion) << std::endl;
+
+    // Expose the python callback function installation and removal functions
+    m.def("add_python_callback", &InstallPythonCallback);
+    m.def("remove_python_callback", &ClearPythonCallback);
 }
