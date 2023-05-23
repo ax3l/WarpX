@@ -51,7 +51,7 @@ jobs:
           -DAMReX_AMD_ARCH=gfx900     \
           -DWarpX_COMPUTE=HIP         \
           -DWarpX_EB=ON               \
-          -DWarpX_LIB=ON              \
+          -DWarpX_PYTHON=ON           \
           -DWarpX_MPI=ON              \
           -DWarpX_OPENPMD=ON          \
           -DWarpX_PRECISION=SINGLE    \
@@ -107,7 +107,7 @@ jobs:
           -DWarpX_DIMS=2              \
           -DWarpX_COMPUTE=HIP         \
           -DWarpX_EB=ON               \
-          -DWarpX_LIB=ON              \
+          -DWarpX_PYTHON=ON           \
           -DWarpX_MPI=ON              \
           -DWarpX_OPENPMD=ON          \
           -DWarpX_PRECISION=DOUBLE    \

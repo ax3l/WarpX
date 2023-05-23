@@ -65,7 +65,7 @@ jobs:
           -DCMAKE_VERBOSE_MAKEFILE=ON  \
           -DWarpX_COMPUTE=CUDA         \
           -DWarpX_EB=ON                \
-          -DWarpX_LIB=ON               \
+          -DWarpX_PYTHON=ON            \
           -DAMReX_CUDA_ARCH=6.0        \
           -DWarpX_OPENPMD=ON           \
           -DWarpX_openpmd_internal=OFF \
@@ -161,7 +161,7 @@ jobs:
           -DCMAKE_VERBOSE_MAKEFILE=ON  \
           -DWarpX_COMPUTE=CUDA         \
           -DWarpX_EB=ON                \
-          -DWarpX_LIB=ON               \
+          -DWarpX_PYTHON=ON            \
           -DAMReX_CUDA_ARCH=8.0        \
           -DWarpX_OPENPMD=ON           \
           -DWarpX_PSATD=ON             \
