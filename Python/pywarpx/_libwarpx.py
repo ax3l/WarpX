@@ -201,7 +201,7 @@ class LibWarpX():
             ctypes.c_char_p(species_name.encode('utf-8')))
 
     def amrex_init(self, argv, mpi_comm=None):
-        if mpi_comm is None or MPI is None:
+        if mpi_comm is None:
             self.libwarpx_so.amrex_init(argv)
         else:
             raise Exception('mpi_comm argument not yet supported')
