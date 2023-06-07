@@ -201,7 +201,7 @@ class LibWarpX():
             ctypes.c_char_p(species_name.encode('utf-8')))
 
     def amrex_init(self, argv, mpi_comm=None):
-        if mpi_comm is None:
+        if mpi_comm is None or MPI is None:
             self.libwarpx_so.amrex_init(argv)
         else:
             raise Exception('mpi_comm argument not yet supported')
@@ -802,7 +802,7 @@ class LibWarpX():
         comm           : bool
             Should the component be communicated
         '''
-
+        wx = self.libwarpx_so.WarpX.get_instance()
         self.libwarpx_so.warpx_addRealComp(
             ctypes.c_char_p(species_name.encode('utf-8')),
             ctypes.c_char_p(pid_name.encode('utf-8')), comm

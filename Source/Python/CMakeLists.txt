@@ -12,6 +12,7 @@ foreach(D IN LISTS WarpX_DIMS)
         target_sources(pyWarpX_${SD}
           PRIVATE
             WarpX.cpp
+            MultiParticleContainer.cpp
         )
     endif()
 endforeach()
