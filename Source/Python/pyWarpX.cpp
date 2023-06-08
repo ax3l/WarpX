@@ -117,6 +117,7 @@ PYBIND11_MODULE(PYWARPX_MODULE_NAME, m) {
 
     // Expose the WarpX instance
     m.def("get_instance", &WarpX::GetInstance,
+        py::return_value_policy::reference,
         "Return a reference to the WarpX object.");
 
     // Expose the python callback function installation and removal functions
