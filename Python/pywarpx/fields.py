@@ -61,7 +61,7 @@ class _MultiFABWrapper(object):
     Parameters
     ----------
      mf_name: string
-         The name of the MultiFab to be accessed, the tag specified when the 
+         The name of the MultiFab to be accessed, the tag specified when the
          MultiFab is allocated
 
      level: int
