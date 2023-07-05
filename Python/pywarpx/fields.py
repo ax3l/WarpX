@@ -82,7 +82,7 @@ class _MultiFABWrapper(object):
         # The overlaps list is one along the axes where the grid boundaries overlap the neighboring grid,
         # which is the case with node centering.
         ix_type = self.mf.box_array().ix_type()
-        self.overlaps = self._get_indices([int(ix_type.nodeCentered(i)) for i in range(self.dim)], 0)
+        self.overlaps = self._get_indices([int(ix_type.node_centered(i)) for i in range(self.dim)], 0)
 
     def __len__(self):
         "Returns the number of blocks"
@@ -130,7 +130,7 @@ class _MultiFABWrapper(object):
 
         # The centering shift
         ix_type = self.mf.box_array().ix_type()
-        if ix_type.nodeCentered(idir):
+        if ix_type.node_centered(idir):
             # node centered
             shift = 0.
         else:
