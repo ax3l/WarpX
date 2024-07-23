@@ -1,0 +1,54 @@
+# please set your project account
+#export proj="<yourProjectNameHere>"  # edit this and comment in
+
+# required dependencies
+module load cmake/3.24.2
+module load gcc/11.2.0
+module load cuda/11.4
+
+# optional: for QED lookup table generation support
+module load boost/1.84.0
+
+# optional: for openPMD support
+module load phdf5/1.10.4
+SRC_DIR="/usr/workspace/${USER}/lonestar6/src"
+SW_DIR="/usr/workspace/${USER}/lonestar6/gpu"
+export CMAKE_PREFIX_PATH=${SW_DIR}/c-blosc-1.21.1:$CMAKE_PREFIX_PATH
+export CMAKE_PREFIX_PATH=${SW_DIR}/adios2-2.8.3:$CMAKE_PREFIX_PATH
+export LD_LIBRARY_PATH=${SW_DIR}/c-blosc-1.21.1/lib64:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${SW_DIR}/adios2-2.8.3/lib64:$LD_LIBRARY_PATH
+export PATH=${SW_DIR}/adios2-2.8.3/bin:${PATH}
+
+# optional: for PSATD in RZ geometry support
+export CMAKE_PREFIX_PATH=${SW_DIR}/blaspp-2024.05.31:$CMAKE_PREFIX_PATH
+export CMAKE_PREFIX_PATH=${SW_DIR}/lapackpp-2024.05.31:$CMAKE_PREFIX_PATH
+export LD_LIBRARY_PATH=${SW_DIR}/blaspp-2024.05.31/lib64:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${SW_DIR}/lapackpp-2024.05.31/lib64:$LD_LIBRARY_PATH
+
+# optional: for Python bindings
+module load python3/3.9.5
+
+if [ -d "${SW_DIR}/venvs/warpx-lonestar6-a100" ]
+then
+    source ${SW_DIR}/venvs/warpx-lonestar6-a100/bin/activate
+fi
+
+# optional: an alias to request an interactive node for one hour
+#   for parallel execution, start on the batch node: srun <command>
+alias getNode="salloc -N 1 --ntasks-per-node=4 -t 1:00:00 -q interactive -C gpu --gpu-bind=single:1 -c 32 -G 4 -A $proj"
+# an alias to run a command on a batch node for up to 30min
+#   usage: runNode <command>
+alias runNode="srun -N 1 --ntasks-per-node=4 -t 0:30:00 -q interactive -C gpu --gpu-bind=single:1 -c 32 -G 4 -A $proj"
+
+# fix system defaults: do not escape $ with a \ on tab completion
+shopt -s direxpand
+
+# optimize CUDA compilation for A100
+export AMREX_CUDA_ARCH=8.0
+
+# compiler environment hints
+export CC=$(which gcc)
+export CXX=$(which g++)
+export FC=$(which gfortran)
+export CUDACXX=$(which nvcc)
+export CUDAHOSTCXX=${CXX}
