@@ -40,11 +40,12 @@ void WarpX::HybridPICEvolveFields ()
     // Deposit cold-relativistic fluid charge and current
     if (do_fluid_species) {
         int const lev = 0;
-        myfl->DepositCharge(lev, *m_fields.get("rho_fp", lev));
+        myfl->DepositCharge(lev, *m_fields.get("rho_fp", lev), m_fields);
         myfl->DepositCurrent(lev,
             *m_fields.get("current_fp", Direction{0}, lev),
             *m_fields.get("current_fp", Direction{1}, lev),
-            *m_fields.get("current_fp", Direction{2}, lev));
+            *m_fields.get("current_fp", Direction{2}, lev),
+            m_fields);
     }
 
     // Synchronize J and rho:
