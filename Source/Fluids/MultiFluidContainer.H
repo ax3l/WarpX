@@ -10,6 +10,8 @@
 
 #include "WarpXFluidContainer_fwd.H"
 
+#include <ablastr/fields/MultiFabRegister.H>
+
 #include<AMReX_MultiFab.H>
 #include <AMReX_Vector.H>
 
@@ -52,9 +54,9 @@ public:
     }
 #endif
 
-    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm);
+    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, ablastr::fields::MultiFabRegister& m_fields);
 
-    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time);
+    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields);
 
     ///
     /// This evolves all the fluids by one PIC time step, including current deposition, the
@@ -64,13 +66,14 @@ public:
                  const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
                  const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
                  amrex::MultiFab* rho, amrex::MultiFab& jx,  amrex::MultiFab& jy, amrex::MultiFab& jz,
-                 amrex::Real cur_time, bool skip_deposition=false);
+                 amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields, bool skip_deposition=false);
 
     [[nodiscard]] int nSpecies() const {return static_cast<int>(species_names.size());}
 
-    void DepositCharge (int lev, amrex::MultiFab &rho);
+    void DepositCharge (int lev, amrex::MultiFab &rho, ablastr::fields::MultiFabRegister& m_fields);
     void DepositCurrent (int lev,
-        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz);
+        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz,
+        ablastr::fields::MultiFabRegister& m_fields);
 
 private:
 
