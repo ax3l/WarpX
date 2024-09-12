@@ -47,7 +47,7 @@ RhoFunctor::operator() ( amrex::MultiFab& mf_dst, const int dcomp, const int /*i
         rho = mypc.GetChargeDensity(m_lev, true);
         if (warpx.DoFluidSpecies()) {
             auto& myfl = warpx.GetFluidContainer();
-            myfl.DepositCharge(m_lev, *rho, m_fields);
+            myfl.DepositCharge(m_lev, *rho, warpx.m_fields);
         }
     }
     // Dump rho per species
