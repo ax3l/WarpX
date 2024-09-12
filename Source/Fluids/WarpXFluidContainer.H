@@ -38,9 +38,9 @@ public:
     WarpXFluidContainer(WarpXFluidContainer&& )                   = default;
     WarpXFluidContainer& operator=(WarpXFluidContainer&& )        = default;
 
-    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm);
+    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, ablastr::fields::MultiFabRegister& m_fields);
 
-    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time);
+    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields);
 
     void ReadParameters ();
 
@@ -51,7 +51,7 @@ public:
         const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
         const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
         amrex::MultiFab* rho, amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz,
-        amrex::Real cur_time, bool skip_deposition=false);
+        amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields, bool skip_deposition=false);
 
     /**
      * AdvectivePush_Muscl takes a single timestep (dt) of the cold relativistic fluid equations
@@ -61,7 +61,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void AdvectivePush_Muscl (int lev);
+    void AdvectivePush_Muscl (int lev, ablastr::fields::MultiFabRegister& m_fields);
 
 
     /**
@@ -72,7 +72,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void ApplyBcFluidsAndComms (int lev);
+    void ApplyBcFluidsAndComms (int lev, ablastr::fields::MultiFabRegister& m_fields);
 
 #if defined(WARPX_DIM_RZ)
     /**
@@ -83,7 +83,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void centrifugal_source_rz (int lev);
+    void centrifugal_source_rz (int lev, ablastr::fields::MultiFabRegister& m_fields);
 #endif
 
     /**
@@ -104,7 +104,7 @@ public:
     void GatherAndPush (int lev,
         const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
         const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
-        amrex::Real t);
+        amrex::Real t, ablastr::fields::MultiFabRegister& m_fields);
 
     /**
      * DepositCurrent interpolates the fluid current density comps. onto the Yee grid and
@@ -118,7 +118,7 @@ public:
      * \param[in,out] jz current density MultiFab z comp.
      */
     void DepositCurrent (int lev,
-        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz);
+        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz, ablastr::fields::MultiFabRegister& m_fields);
 
     /**
      * DepositCharge interpolates the fluid charge density onto the Yee grid and
@@ -129,7 +129,7 @@ public:
      * \param[in] lev refinement level
      * \param[in,out] rho charge density MultiFab.
      */
-    void DepositCharge (int lev, amrex::MultiFab &rho, int icomp = 0);
+    void DepositCharge (int lev, amrex::MultiFab &rho, ablastr::fields::MultiFabRegister& m_fields, int icomp = 0);
 
     [[nodiscard]] amrex::Real getCharge () const {return charge;}
     [[nodiscard]] amrex::Real getMass () const {return mass;}
@@ -185,9 +185,9 @@ protected:
 
 public:
 
-    // MultiFabs that contain the density (N) and momentum density (NU) of this fluid species, for each refinement level
-    amrex::Vector<            std::unique_ptr<amrex::MultiFab>      > N;
-    amrex::Vector<std::array< std::unique_ptr<amrex::MultiFab>, 3 > > NU;
+    // Names of Multifabs that will be added to the mfs register
+    std::string name_mf_N = "fluid_density_"+species_name; 
+    std::string name_mf_NU = "fluid_momentum_density_"+species_name; 
 
 };
 
