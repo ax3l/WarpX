@@ -101,19 +101,19 @@ WarpX::UpdateAuxilaryDataStagToNodal ()
 #endif
     using ablastr::fields::Direction;
 
-    ablastr::fields::MultiLevelVectorField const& Efield_fp = m_fields.get_mr_levels_alldirs("Efield_fp", finest_level);
     ablastr::fields::MultiLevelVectorField const& Bfield_fp = m_fields.get_mr_levels_alldirs("Bfield_fp", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Efield_cp = m_fields.get_mr_levels_alldirs("Efield_cp", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Bfield_cp = m_fields.get_mr_levels_alldirs("Bfield_cp", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Efield_avg_fp = m_fields.get_mr_levels_alldirs("Efield_avg_fp", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Bfield_avg_fp = m_fields.get_mr_levels_alldirs("Bfield_avg_fp", finest_level);
+    ablastr::fields::MultiLevelVectorField const& Efield_fp = m_fields.get_mr_levels_alldirs("Efield_fp", finest_level);
     ablastr::fields::MultiLevelVectorField const& Efield_aux = m_fields.get_mr_levels_alldirs("Efield_aux", finest_level);
     ablastr::fields::MultiLevelVectorField const& Bfield_aux = m_fields.get_mr_levels_alldirs("Bfield_aux", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Efield_cax = m_fields.get_mr_levels_alldirs("Efield_cax", finest_level);
-    ablastr::fields::MultiLevelVectorField const& Bfield_cax = m_fields.get_mr_levels_alldirs("Bfield_cax", finest_level);
 
-    ablastr::fields::MultiLevelVectorField const & Bmf = WarpX::fft_do_time_averaging ? Bfield_avg_fp : Bfield_fp;
-    ablastr::fields::MultiLevelVectorField const & Emf = WarpX::fft_do_time_averaging ? Efield_avg_fp : Efield_fp;
+    ablastr::fields::MultiLevelVectorField const & Bmf =
+        WarpX::fft_do_time_averaging ?
+        m_fields.get_mr_levels_alldirs("Bfield_avg_fp", finest_level) :
+        Bfield_fp;
+    ablastr::fields::MultiLevelVectorField const & Emf =
+        WarpX::fft_do_time_averaging ?
+        m_fields.get_mr_levels_alldirs("Efield_avg_fp", finest_level) :
+        Efield_fp;
 
     const amrex::IntVect& Bx_stag = Bmf[0][0]->ixType().toIntVect();
     const amrex::IntVect& By_stag = Bmf[0][1]->ixType().toIntVect();
@@ -222,13 +222,13 @@ WarpX::UpdateAuxilaryDataStagToNodal ()
 
                 const amrex::IntVect& refinement_ratio = refRatio(lev-1);
 
-                const amrex::IntVect& Bx_fp_stag = Bfield_fp[lev][0]->ixType().toIntVect();
-                const amrex::IntVect& By_fp_stag = Bfield_fp[lev][1]->ixType().toIntVect();
-                const amrex::IntVect& Bz_fp_stag = Bfield_fp[lev][2]->ixType().toIntVect();
+                const amrex::IntVect& Bx_fp_stag = m_fields.get("Bfield_fp",Direction{0},lev)->ixType().toIntVect();
+                const amrex::IntVect& By_fp_stag = m_fields.get("Bfield_fp",Direction{1},lev)->ixType().toIntVect();
+                const amrex::IntVect& Bz_fp_stag = m_fields.get("Bfield_fp",Direction{2},lev)->ixType().toIntVect();
 
-                const amrex::IntVect& Bx_cp_stag = Bfield_cp[lev][0]->ixType().toIntVect();
-                const amrex::IntVect& By_cp_stag = Bfield_cp[lev][1]->ixType().toIntVect();
-                const amrex::IntVect& Bz_cp_stag = Bfield_cp[lev][2]->ixType().toIntVect();
+                const amrex::IntVect& Bx_cp_stag = m_fields.get("Bfield_cp",Direction{0},lev)->ixType().toIntVect();
+                const amrex::IntVect& By_cp_stag = m_fields.get("Bfield_cp",Direction{1},lev)->ixType().toIntVect();
+                const amrex::IntVect& Bz_cp_stag = m_fields.get("Bfield_cp",Direction{2},lev)->ixType().toIntVect();
 
 #ifdef AMREX_USE_OMP
 #pragma omp parallel if (Gpu::notInLaunchRegion())
@@ -238,12 +238,12 @@ WarpX::UpdateAuxilaryDataStagToNodal ()
                     Array4<Real> const& bx_aux = Bfield_aux[lev][0]->array(mfi);
                     Array4<Real> const& by_aux = Bfield_aux[lev][1]->array(mfi);
                     Array4<Real> const& bz_aux = Bfield_aux[lev][2]->array(mfi);
-                    Array4<Real const> const& bx_fp = Bfield_fp[lev][0]->const_array(mfi);
-                    Array4<Real const> const& by_fp = Bfield_fp[lev][1]->const_array(mfi);
-                    Array4<Real const> const& bz_fp = Bfield_fp[lev][2]->const_array(mfi);
-                    Array4<Real const> const& bx_cp = Bfield_cp[lev][0]->const_array(mfi);
-                    Array4<Real const> const& by_cp = Bfield_cp[lev][1]->const_array(mfi);
-                    Array4<Real const> const& bz_cp = Bfield_cp[lev][2]->const_array(mfi);
+                    Array4<Real const> const& bx_fp = m_fields.get("Bfield_fp",Direction{0},lev)->const_array(mfi);
+                    Array4<Real const> const& by_fp = m_fields.get("Bfield_fp",Direction{1},lev)->const_array(mfi);
+                    Array4<Real const> const& bz_fp = m_fields.get("Bfield_fp",Direction{2},lev)->const_array(mfi);
+                    Array4<Real const> const& bx_cp = m_fields.get("Bfield_cp",Direction{0},lev)->const_array(mfi);
+                    Array4<Real const> const& by_cp = m_fields.get("Bfield_cp",Direction{1},lev)->const_array(mfi);
+                    Array4<Real const> const& bz_cp = m_fields.get("Bfield_cp",Direction{2},lev)->const_array(mfi);
                     Array4<Real const> const& bx_c = Btmp[0]->const_array(mfi);
                     Array4<Real const> const& by_c = Btmp[1]->const_array(mfi);
                     Array4<Real const> const& bz_c = Btmp[2]->const_array(mfi);
@@ -770,16 +770,20 @@ WarpX::FillBoundaryB (const int lev, const PatchType patch_type, const amrex::In
     std::array<amrex::MultiFab*,3> mf;
     amrex::Periodicity period;
 
+    using ablastr::fields::Direction;
+
     if (patch_type == PatchType::fine)
     {
-        ablastr::fields::MultiLevelVectorField const& Bfield_fp = m_fields.get_mr_levels_alldirs("Bfield_fp", finest_level);
-        mf     = {Bfield_fp[lev][0], Bfield_fp[lev][1], Bfield_fp[lev][2]};
+        mf     = {m_fields.get("Bfield_fp",Direction{0},lev),
+                  m_fields.get("Bfield_fp",Direction{1},lev),
+                  m_fields.get("Bfield_fp",Direction{2},lev)};
         period = Geom(lev).periodicity();
     }
     else // coarse patch
     {
-        ablastr::fields::MultiLevelVectorField const& Bfield_cp_new = m_fields.get_mr_levels_alldirs("Bfield_cp", finest_level);
-        mf     = {Bfield_cp_new[lev][0], Bfield_cp_new[lev][1], Bfield_cp_new[lev][2]};
+        mf     = {m_fields.get("Bfield_cp",Direction{0},lev),
+                  m_fields.get("Bfield_cp",Direction{1},lev),
+                  m_fields.get("Bfield_cp",Direction{2},lev)};
         period = Geom(lev-1).periodicity();
     }
 
@@ -1023,7 +1027,9 @@ void WarpX::FillBoundaryG (int lev, PatchType patch_type, IntVect ng, std::optio
             if (m_fields.has("pml_G_cp",lev) && m_fields.has("G_cp",lev)) {
                 pml[lev]->Exchange(m_fields.get("pml_G_cp", lev), m_fields.get("G_cp", lev), patch_type, do_pml_in_domain);
             }
-            pml[lev]->FillBoundary(*m_fields.get("pml_G_cp", lev), patch_type, nodal_sync);
+            if (m_fields.has("pml_G_cp", lev)) {
+                pml[lev]->FillBoundary(*m_fields.get("pml_G_cp", lev), patch_type, nodal_sync);
+            }
         }
 
         if (m_fields.has("G_cp",lev))
