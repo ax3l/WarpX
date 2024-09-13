@@ -61,7 +61,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void AdvectivePush_Muscl (int lev, ablastr::fields::MultiFabRegister& m_fields);
+    void AdvectivePush_Muscl (ablastr::fields::MultiFabRegister& m_fields, int lev);
 
 
     /**
@@ -72,7 +72,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void ApplyBcFluidsAndComms (int lev, ablastr::fields::MultiFabRegister& m_fields);
+    void ApplyBcFluidsAndComms (ablastr::fields::MultiFabRegister& m_fields, int lev);
 
 #if defined(WARPX_DIM_RZ)
     /**
@@ -83,7 +83,7 @@ public:
      *
      * \param[in] lev refinement level
      */
-    void centrifugal_source_rz (int lev, ablastr::fields::MultiFabRegister& m_fields);
+    void centrifugal_source_rz (ablastr::fields::MultiFabRegister& m_fields, int lev);
 #endif
 
     /**

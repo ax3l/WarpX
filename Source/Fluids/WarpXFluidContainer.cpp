@@ -281,15 +281,15 @@ void WarpXFluidContainer::Evolve(
     // Cylindrical centrifugal term
     if(!do_not_push){
 #if defined(WARPX_DIM_RZ)
-        centrifugal_source_rz(lev, m_fields);
+        centrifugal_source_rz(m_fields, lev);
 #endif
 
         // Apply (non-periodic) BC on the fluids (needed for spatial derivative),
         // and communicate N, NU at boundaries
-        ApplyBcFluidsAndComms(lev, m_fields);
+        ApplyBcFluidsAndComms(m_fields, lev);
 
         // Step the Advective term
-        AdvectivePush_Muscl(lev, m_fields);
+        AdvectivePush_Muscl(m_fields, lev);
     }
 
     // Deposit rho to the simulation mesh
@@ -309,7 +309,7 @@ void WarpXFluidContainer::Evolve(
 }
 
 // Momentum source due to curvature
-void WarpXFluidContainer::ApplyBcFluidsAndComms (int lev, ablastr::fields::MultiFabRegister& m_fields)
+void WarpXFluidContainer::ApplyBcFluidsAndComms (ablastr::fields::MultiFabRegister& m_fields, int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::ApplyBcFluidsAndComms");
@@ -413,7 +413,7 @@ void WarpXFluidContainer::ApplyBcFluidsAndComms (int lev, ablastr::fields::Multi
 }
 
 // Muscl Advection Update
-void WarpXFluidContainer::AdvectivePush_Muscl (int lev, ablastr::fields::MultiFabRegister& m_fields)
+void WarpXFluidContainer::AdvectivePush_Muscl (ablastr::fields::MultiFabRegister& m_fields, int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::AdvectivePush_Muscl");
@@ -890,7 +890,7 @@ void WarpXFluidContainer::AdvectivePush_Muscl (int lev, ablastr::fields::MultiFa
 
 // Momentum source due to curvature
 #if defined(WARPX_DIM_RZ)
-void WarpXFluidContainer::centrifugal_source_rz (int lev, ablastr::fields::MultiFabRegister& m_fields)
+void WarpXFluidContainer::centrifugal_source_rz (ablastr::fields::MultiFabRegister& m_fields, int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::centrifugal_source_rz");
