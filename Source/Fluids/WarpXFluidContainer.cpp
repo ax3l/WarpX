@@ -138,6 +138,7 @@ void WarpXFluidContainer::ReadParameters()
 
 void WarpXFluidContainer::AllocateLevelMFs(int lev, const BoxArray &ba, const DistributionMapping &dm, ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     const int ncomps = 1;
     const amrex::IntVect nguards(AMREX_D_DECL(2, 2, 2));
   
@@ -161,6 +162,7 @@ void WarpXFluidContainer::AllocateLevelMFs(int lev, const BoxArray &ba, const Di
 
 void WarpXFluidContainer::InitData(int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::InitData");
 
     // Convert initialization box to nodal box
@@ -298,6 +300,7 @@ void WarpXFluidContainer::Evolve(
 // Momentum source due to curvature
 void WarpXFluidContainer::ApplyBcFluidsAndComms (int lev, ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::ApplyBcFluidsAndComms");
 
     WarpX &warpx = WarpX::GetInstance();
@@ -401,6 +404,7 @@ void WarpXFluidContainer::ApplyBcFluidsAndComms (int lev, ablastr::fields::Multi
 // Muscl Advection Update
 void WarpXFluidContainer::AdvectivePush_Muscl (int lev, ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::AdvectivePush_Muscl");
 
     // Grab the grid spacing
@@ -877,6 +881,7 @@ void WarpXFluidContainer::AdvectivePush_Muscl (int lev, ablastr::fields::MultiFa
 #if defined(WARPX_DIM_RZ)
 void WarpXFluidContainer::centrifugal_source_rz (int lev, ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::centrifugal_source_rz");
 
     WarpX &warpx = WarpX::GetInstance();
@@ -950,6 +955,7 @@ void WarpXFluidContainer::GatherAndPush (
     Real t,
     ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::GatherAndPush");
 
     WarpX &warpx = WarpX::GetInstance();
@@ -1257,6 +1263,7 @@ void WarpXFluidContainer::DepositCurrent(
     amrex::MultiFab &jx, amrex::MultiFab &jy, amrex::MultiFab &jz,
     ablastr::fields::MultiFabRegister& m_fields)
 {
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::DepositCurrent");
 
     // Temporary nodal currents
