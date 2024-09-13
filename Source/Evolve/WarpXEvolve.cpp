@@ -1181,6 +1181,7 @@ WarpX::PushParticlesandDeposit (int lev, amrex::Real cur_time, DtType a_dt_type,
                          *m_fields.get(current_fp_string, Direction{1}, lev),
                          *m_fields.get(current_fp_string, Direction{2}, lev),
                          cur_time,
+                         m_fields,
                          skip_current
             );
         }
