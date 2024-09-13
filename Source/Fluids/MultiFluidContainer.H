@@ -54,26 +54,26 @@ public:
     }
 #endif
 
-    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, ablastr::fields::MultiFabRegister& m_fields);
+    void AllocateLevelMFs (ablastr::fields::MultiFabRegister& m_fields, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, int lev);
 
-    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields);
+    void InitData (ablastr::fields::MultiFabRegister& m_fields, amrex::Box init_box, amrex::Real cur_time, int lev);
 
     ///
     /// This evolves all the fluids by one PIC time step, including current deposition, the
     /// field solve, and pushing the fluids, for all the species in the MultiFluidContainer.
     ///
-    void Evolve (int lev,
-                 const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
-                 const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
-                 amrex::MultiFab* rho, amrex::MultiFab& jx,  amrex::MultiFab& jy, amrex::MultiFab& jz,
-                 amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields, bool skip_deposition=false);
+    void Evolve (ablastr::fields::MultiFabRegister& m_fields, 
+                 int lev,
+                 std::string current_fp_string,
+                 amrex::Real cur_time, 
+                 bool skip_deposition=false);
 
     [[nodiscard]] int nSpecies() const {return static_cast<int>(species_names.size());}
 
-    void DepositCharge (int lev, amrex::MultiFab &rho, ablastr::fields::MultiFabRegister& m_fields);
-    void DepositCurrent (int lev,
+    void DepositCharge (ablastr::fields::MultiFabRegister& m_fields, amrex::MultiFab &rho, int lev);
+    void DepositCurrent (ablastr::fields::MultiFabRegister& m_fields,
         amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz,
-        ablastr::fields::MultiFabRegister& m_fields);
+        int lev);
 
 private:
 

@@ -38,20 +38,20 @@ public:
     WarpXFluidContainer(WarpXFluidContainer&& )                   = default;
     WarpXFluidContainer& operator=(WarpXFluidContainer&& )        = default;
 
-    void AllocateLevelMFs (int lev, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, ablastr::fields::MultiFabRegister& m_fields);
+    void AllocateLevelMFs (ablastr::fields::MultiFabRegister& m_fields, const amrex::BoxArray& ba, const amrex::DistributionMapping& dm, int lev);
 
-    void InitData (int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields);
+    void InitData (ablastr::fields::MultiFabRegister& m_fields, amrex::Box init_box, amrex::Real cur_time, int lev);
 
     void ReadParameters ();
 
     /**
      * Evolve updates a single timestep (dt) of the cold relativistic fluid equations
      */
-    void Evolve (int lev,
-        const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
-        const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
-        amrex::MultiFab* rho, amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz,
-        amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields, bool skip_deposition=false);
+    void Evolve (ablastr::fields::MultiFabRegister& m_fields, 
+                 int lev,
+                 std::string current_fp_string,
+                 amrex::Real cur_time, 
+                 bool skip_deposition=false);
 
     /**
      * AdvectivePush_Muscl takes a single timestep (dt) of the cold relativistic fluid equations
@@ -101,10 +101,10 @@ public:
      * \param[in] Bz Yee magnetic field (z)
      * \param[in] t Current time
      */
-    void GatherAndPush (int lev,
+    void GatherAndPush (ablastr::fields::MultiFabRegister& m_fields,
         const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
         const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
-        amrex::Real t, ablastr::fields::MultiFabRegister& m_fields);
+        amrex::Real t, int lev);
 
     /**
      * DepositCurrent interpolates the fluid current density comps. onto the Yee grid and
@@ -117,8 +117,8 @@ public:
      * \param[in,out] jy current density MultiFab y comp.
      * \param[in,out] jz current density MultiFab z comp.
      */
-    void DepositCurrent (int lev,
-        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz, ablastr::fields::MultiFabRegister& m_fields);
+    void DepositCurrent (ablastr::fields::MultiFabRegister& m_fields,
+        amrex::MultiFab& jx, amrex::MultiFab& jy, amrex::MultiFab& jz, int lev);
 
     /**
      * DepositCharge interpolates the fluid charge density onto the Yee grid and
@@ -129,7 +129,7 @@ public:
      * \param[in] lev refinement level
      * \param[in,out] rho charge density MultiFab.
      */
-    void DepositCharge (int lev, amrex::MultiFab &rho, ablastr::fields::MultiFabRegister& m_fields, int icomp = 0);
+    void DepositCharge (ablastr::fields::MultiFabRegister& m_fields, amrex::MultiFab &rho, int lev, int icomp = 0);
 
     [[nodiscard]] amrex::Real getCharge () const {return charge;}
     [[nodiscard]] amrex::Real getMass () const {return mass;}

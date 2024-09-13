@@ -136,7 +136,7 @@ void WarpXFluidContainer::ReadParameters()
     }
 }
 
-void WarpXFluidContainer::AllocateLevelMFs(int lev, const BoxArray &ba, const DistributionMapping &dm, ablastr::fields::MultiFabRegister& m_fields)
+void WarpXFluidContainer::AllocateLevelMFs(ablastr::fields::MultiFabRegister& m_fields, const BoxArray &ba, const DistributionMapping &dm, int lev)
 {
     using ablastr::fields::Direction;
     const int ncomps = 1;
@@ -160,7 +160,7 @@ void WarpXFluidContainer::AllocateLevelMFs(int lev, const BoxArray &ba, const Di
     
 }
 
-void WarpXFluidContainer::InitData(int lev, amrex::Box init_box, amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields)
+void WarpXFluidContainer::InitData(ablastr::fields::MultiFabRegister& m_fields, amrex::Box init_box, amrex::Real cur_time, int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::InitData");
@@ -252,23 +252,30 @@ void WarpXFluidContainer::InitData(int lev, amrex::Box init_box, amrex::Real cur
 
 
 void WarpXFluidContainer::Evolve(
+    ablastr::fields::MultiFabRegister& m_fields, 
     int lev,
-    const amrex::MultiFab &Ex, const amrex::MultiFab &Ey, const amrex::MultiFab &Ez,
-    const amrex::MultiFab &Bx, const amrex::MultiFab &By, const amrex::MultiFab &Bz,
-    amrex::MultiFab* rho, amrex::MultiFab &jx, amrex::MultiFab &jy, amrex::MultiFab &jz,
-    amrex::Real cur_time, ablastr::fields::MultiFabRegister& m_fields, bool skip_deposition)
+    std::string current_fp_string,
+    amrex::Real cur_time, 
+    bool skip_deposition)
 {
-
+    using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::Evolve");
 
-    if (rho && ! skip_deposition && ! do_not_deposit) {
+    if (m_fields.get("rho_fp",lev) && ! skip_deposition && ! do_not_deposit) {
         // Deposit charge before particle push, in component 0 of MultiFab rho.
-        DepositCharge(lev, *rho, m_fields, 0);
+        DepositCharge(m_fields, *m_fields.get("rho_fp",lev), lev, 0);
     }
 
     // Step the Lorentz Term
     if(!do_not_gather){
-        GatherAndPush(lev, Ex, Ey, Ez, Bx, By, Bz, cur_time, m_fields);
+        GatherAndPush(m_fields, 
+                    *m_fields.get("Efield_aux", Direction{0}, lev),
+                    *m_fields.get("Efield_aux", Direction{1}, lev), 
+                    *m_fields.get("Efield_aux", Direction{2}, lev),
+                    *m_fields.get("Bfield_aux", Direction{0}, lev),
+                    *m_fields.get("Bfield_aux", Direction{1}, lev),
+                    *m_fields.get("Bfield_aux", Direction{2}, lev),
+                    cur_time, lev);
     }
 
     // Cylindrical centrifugal term
@@ -287,13 +294,17 @@ void WarpXFluidContainer::Evolve(
 
     // Deposit rho to the simulation mesh
     // Deposit charge (end of the step)
-    if (rho && ! skip_deposition && ! do_not_deposit) {
-        DepositCharge(lev, *rho, m_fields, 1);
+    if (m_fields.get("rho_fp",lev) && ! skip_deposition && ! do_not_deposit) {
+        DepositCharge(m_fields, *m_fields.get("rho_fp",lev), lev, 1);
     }
 
     // Deposit J to the simulation mesh
     if (!skip_deposition && ! do_not_deposit) {
-        DepositCurrent(lev, jx, jy, jz, m_fields);
+        DepositCurrent(m_fields, 
+                        *m_fields.get(current_fp_string, Direction{0}, lev), 
+                        *m_fields.get(current_fp_string, Direction{1}, lev), 
+                        *m_fields.get(current_fp_string, Direction{2}, lev), 
+                        lev);
     }
 }
 
@@ -949,11 +960,11 @@ void WarpXFluidContainer::centrifugal_source_rz (int lev, ablastr::fields::Multi
 
 // Momentum source from fields
 void WarpXFluidContainer::GatherAndPush (
-    int lev,
+    ablastr::fields::MultiFabRegister& m_fields,
     const amrex::MultiFab& Ex, const amrex::MultiFab& Ey, const amrex::MultiFab& Ez,
     const amrex::MultiFab& Bx, const amrex::MultiFab& By, const amrex::MultiFab& Bz,
     Real t,
-    ablastr::fields::MultiFabRegister& m_fields)
+    int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::GatherAndPush");
@@ -1222,7 +1233,7 @@ void WarpXFluidContainer::GatherAndPush (
     }
 }
 
-void WarpXFluidContainer::DepositCharge (int lev, amrex::MultiFab &rho, ablastr::fields::MultiFabRegister& m_fields, int icomp)
+void WarpXFluidContainer::DepositCharge (ablastr::fields::MultiFabRegister& m_fields, amrex::MultiFab &rho, int lev, int icomp)
 {
     WARPX_PROFILE("WarpXFluidContainer::DepositCharge");
 
@@ -1259,9 +1270,9 @@ void WarpXFluidContainer::DepositCharge (int lev, amrex::MultiFab &rho, ablastr:
 
 
 void WarpXFluidContainer::DepositCurrent(
-    int lev,
+    ablastr::fields::MultiFabRegister& m_fields,
     amrex::MultiFab &jx, amrex::MultiFab &jy, amrex::MultiFab &jz,
-    ablastr::fields::MultiFabRegister& m_fields)
+    int lev)
 {
     using ablastr::fields::Direction;
     WARPX_PROFILE("WarpXFluidContainer::DepositCurrent");
