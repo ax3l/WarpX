@@ -543,9 +543,9 @@ void WarpX::HandleParticlesAtBoundaries (int step, amrex::Real cur_time, int num
 
     // interact the particles with EB walls (if present)
     if (EB::enabled()) {
-        mypc->ScrapeParticlesAtEB(m_fields.get_mr_levels("distance_to_e", finest_level));
+        mypc->ScrapeParticlesAtEB(m_fields.get_mr_levels("distance_to_eb", finest_level));
         m_particle_boundary_buffer->gatherParticlesFromEmbeddedBoundaries(
-            *mypc, m_fields.get_mr_levels("distance_to_e", finest_level));
+            *mypc, m_fields.get_mr_levels("distance_to_eb", finest_level));
         mypc->deleteInvalidParticles();
     }
 
@@ -571,9 +571,7 @@ void WarpX::SyncCurrentAndRho ()
                 ? "current_fp_vay" : "current_fp";
             // TODO Replace current_cp with current_cp_vay once Vay deposition is implemented with MR
 
-            SyncCurrent(m_fields.get_mr_levels_alldirs(current_fp_string, finest_level),
-                        m_fields.get_mr_levels_alldirs("current_cp", finest_level),
-                        m_fields.get_mr_levels_alldirs("current_buf", finest_level) );
+            SyncCurrent(current_fp_string);
             SyncRho();
 
         }
@@ -585,9 +583,7 @@ void WarpX::SyncCurrentAndRho ()
             if (!current_correction &&
                 current_deposition_algo != CurrentDepositionAlgo::Vay)
             {
-                SyncCurrent(m_fields.get_mr_levels_alldirs("current_fp", finest_level),
-                            m_fields.get_mr_levels_alldirs("current_cp", finest_level),
-                            m_fields.get_mr_levels_alldirs("current_buf", finest_level) );
+                SyncCurrent("current_fp");
                 SyncRho();
             }
 
@@ -603,9 +599,7 @@ void WarpX::SyncCurrentAndRho ()
     }
     else // FDTD
     {
-        SyncCurrent(m_fields.get_mr_levels_alldirs("current_fp", finest_level),
-                    m_fields.get_mr_levels_alldirs("current_cp", finest_level),
-                    m_fields.get_mr_levels_alldirs("current_buf", finest_level) );
+        SyncCurrent("current_fp");
         SyncRho();
     }
 
@@ -692,10 +686,7 @@ WarpX::OneStep_multiJ (const amrex::Real cur_time)
         // namely 'current_fp_nodal': SyncCurrent stores the result of its centering
         // into 'current_fp' and then performs both filtering, if used, and exchange
         // of guard cells.
-        SyncCurrent(
-            m_fields.get_mr_levels_alldirs( "current_fp", finest_level),
-            m_fields.get_mr_levels_alldirs( "current_cp", finest_level),
-            m_fields.get_mr_levels_alldirs( "current_buf", finest_level) );
+        SyncCurrent("current_fp");
         // Forward FFT of J
         PSATDForwardTransformJ(
             m_fields.get_mr_levels_alldirs( "current_fp", finest_level),
@@ -731,10 +722,7 @@ WarpX::OneStep_multiJ (const amrex::Real cur_time)
         // namely 'current_fp_nodal': SyncCurrent stores the result of its centering
         // into 'current_fp' and then performs both filtering, if used, and exchange
         // of guard cells.
-        SyncCurrent(
-            m_fields.get_mr_levels_alldirs( "current_fp", finest_level),
-            m_fields.get_mr_levels_alldirs( "current_cp", finest_level),
-            m_fields.get_mr_levels_alldirs( "current_buf", finest_level) );
+        SyncCurrent("current_fp");
         // Forward FFT of J
         PSATDForwardTransformJ(
             m_fields.get_mr_levels_alldirs( "current_fp", finest_level),
@@ -799,7 +787,7 @@ WarpX::OneStep_multiJ (const amrex::Real cur_time)
     {
         if (do_pml && pml[lev]->ok())
         {
-            pml[lev]->PushPSATD(lev);
+            pml[lev]->PushPSATD(m_fields, lev);
         }
         ApplyEfieldBoundary(lev, PatchType::fine);
         if (lev > 0) { ApplyEfieldBoundary(lev, PatchType::coarse); }
@@ -1117,28 +1105,16 @@ WarpX::PushParticlesandDeposit (int lev, amrex::Real cur_time, DtType a_dt_type,
         current_fp_string = "current_fp";
     }
 
-    mypc->Evolve(lev,
-                 *m_fields.get("Efield_aux", Direction{0}, lev),
-                 *m_fields.get("Efield_aux", Direction{1}, lev),
-                 *m_fields.get("Efield_aux", Direction{2}, lev),
-                 *m_fields.get("Bfield_aux", Direction{0}, lev),
-                 *m_fields.get("Bfield_aux", Direction{1}, lev),
-                 *m_fields.get("Bfield_aux", Direction{2}, lev),
-                 *m_fields.get(current_fp_string, Direction{0}, lev),
-                 *m_fields.get(current_fp_string, Direction{1}, lev),
-                 *m_fields.get(current_fp_string, Direction{2}, lev),
-                 m_fields.get("current_buf", Direction{0}, lev),
-                 m_fields.get("current_buf", Direction{1}, lev),
-                 m_fields.get("current_buf", Direction{2}, lev),
-                 m_fields.get("rho_fp",lev),
-                 m_fields.get("rho_buf", lev),
-                 m_fields.get("Efield_cax", Direction{0}, lev),
-                 m_fields.get("Efield_cax", Direction{1}, lev),
-                 m_fields.get("Efield_cax", Direction{2}, lev),
-                 m_fields.get("Bfield_cax", Direction{0}, lev),
-                 m_fields.get("Bfield_cax", Direction{1}, lev),
-                 m_fields.get("Bfield_cax", Direction{2}, lev),
-                 cur_time, dt[lev], a_dt_type, skip_current, push_type);
+    mypc->Evolve(
+        m_fields,
+        lev,
+        current_fp_string,
+        cur_time,
+        dt[lev],
+        a_dt_type,
+        skip_current,
+        push_type
+    );
     if (! skip_current) {
 #ifdef WARPX_DIM_RZ
         // This is called after all particles have deposited their current and charge.
@@ -1196,6 +1172,8 @@ WarpX::PushParticlesandDeposit (int lev, amrex::Real cur_time, DtType a_dt_type,
 void
 WarpX::applyMirrors (Real time)
 {
+    using ablastr::fields::Direction;
+
     // something to do?
     if (num_mirrors == 0) {
         return;
@@ -1223,12 +1201,12 @@ WarpX::applyMirrors (Real time)
             const amrex::Real z_max = std::max(z_max_tmp, z_min+mirror_z_npoints[i_mirror]*dz);
 
             // Set each field on the fine patch to zero between z_min and z_max
-            NullifyMF(m_fields, "Efield_fp[0]", lev, z_min, z_max);
-            NullifyMF(m_fields, "Efield_fp[1]", lev, z_min, z_max);
-            NullifyMF(m_fields, "Efield_fp[2]", lev, z_min, z_max);
-            NullifyMF(m_fields, "Bfield_fp[0]", lev, z_min, z_max);
-            NullifyMF(m_fields, "Bfield_fp[1]", lev, z_min, z_max);
-            NullifyMF(m_fields, "Bfield_fp[2]", lev, z_min, z_max);
+            NullifyMF(m_fields, "Efield_fp", Direction{0}, lev, z_min, z_max);
+            NullifyMF(m_fields, "Efield_fp", Direction{1}, lev, z_min, z_max);
+            NullifyMF(m_fields, "Efield_fp", Direction{2}, lev, z_min, z_max);
+            NullifyMF(m_fields, "Bfield_fp", Direction{0}, lev, z_min, z_max);
+            NullifyMF(m_fields, "Bfield_fp", Direction{1}, lev, z_min, z_max);
+            NullifyMF(m_fields, "Bfield_fp", Direction{2}, lev, z_min, z_max);
 
             // If div(E)/div(B) cleaning are used, set F/G field to zero
             NullifyMF(m_fields, "F_fp", lev, z_min, z_max);
@@ -1237,12 +1215,12 @@ WarpX::applyMirrors (Real time)
             if (lev>0)
             {
                 // Set each field on the coarse patch to zero between z_min and z_max
-                NullifyMF(m_fields, "Efield_cp[0]", lev, z_min, z_max);
-                NullifyMF(m_fields, "Efield_cp[1]", lev, z_min, z_max);
-                NullifyMF(m_fields, "Efield_cp[2]", lev, z_min, z_max);
-                NullifyMF(m_fields, "Bfield_cp[0]", lev, z_min, z_max);
-                NullifyMF(m_fields, "Bfield_cp[1]", lev, z_min, z_max);
-                NullifyMF(m_fields, "Bfield_cp[2]", lev, z_min, z_max);
+                NullifyMF(m_fields, "Efield_cp", Direction{0}, lev, z_min, z_max);
+                NullifyMF(m_fields, "Efield_cp", Direction{1}, lev, z_min, z_max);
+                NullifyMF(m_fields, "Efield_cp", Direction{2}, lev, z_min, z_max);
+                NullifyMF(m_fields, "Bfield_cp", Direction{0}, lev, z_min, z_max);
+                NullifyMF(m_fields, "Bfield_cp", Direction{1}, lev, z_min, z_max);
+                NullifyMF(m_fields, "Bfield_cp", Direction{2}, lev, z_min, z_max);
 
                 // If div(E)/div(B) cleaning are used, set F/G field to zero
                 NullifyMF(m_fields, "F_cp", lev, z_min, z_max);

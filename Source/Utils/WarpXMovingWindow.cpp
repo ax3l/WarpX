@@ -151,10 +151,6 @@ WarpX::MoveWindow (const int step, bool move_j)
 
     ablastr::fields::MultiLevelVectorField Efield_aux = m_fields.get_mr_levels_alldirs("Efield_aux", finest_level);
     ablastr::fields::MultiLevelVectorField Bfield_aux = m_fields.get_mr_levels_alldirs("Bfield_aux", finest_level);
-    ablastr::fields::MultiLevelVectorField Efield_avg_fp = m_fields.get_mr_levels_alldirs("Efield_avg_fp", finest_level);
-    ablastr::fields::MultiLevelVectorField Bfield_avg_fp = m_fields.get_mr_levels_alldirs("Bfield_avg_fp", finest_level);
-    ablastr::fields::MultiLevelVectorField Efield_avg_cp = m_fields.get_mr_levels_alldirs("Efield_avg_cp", finest_level);
-    ablastr::fields::MultiLevelVectorField Bfield_avg_cp = m_fields.get_mr_levels_alldirs("Bfield_avg_cp", finest_level);
 
     // Update the continuous position of the moving window,
     // and of the plasma injection
@@ -248,6 +244,8 @@ WarpX::MoveWindow (const int step, bool move_j)
             shiftMF(*m_fields.get("Efield_fp",Direction{0},lev), geom[lev], num_shift, dir, lev, do_update_cost,
                 m_p_ext_field_params->E_external_grid[dim], use_Eparser, Efield_parser);
             if (fft_do_time_averaging) {
+                ablastr::fields::MultiLevelVectorField Efield_avg_fp = m_fields.get_mr_levels_alldirs("Efield_avg_fp", finest_level);
+                ablastr::fields::MultiLevelVectorField Bfield_avg_fp = m_fields.get_mr_levels_alldirs("Bfield_avg_fp", finest_level);
                 shiftMF(*Bfield_avg_fp[lev][dim], geom[lev], num_shift, dir, lev, do_update_cost,
                     m_p_ext_field_params->B_external_grid[dim], use_Bparser, Bfield_parser);
                 shiftMF(*Efield_avg_fp[lev][dim], geom[lev], num_shift, dir, lev, do_update_cost,
@@ -257,8 +255,8 @@ WarpX::MoveWindow (const int step, bool move_j)
                 shiftMF(*m_fields.get("current_fp", Direction{dim}, lev), geom[lev], num_shift, dir, lev, do_update_cost);
             }
             if (pml[lev] && pml[lev]->ok()) {
-                const std::array<amrex::MultiFab*, 3>& pml_B = pml[lev]->GetB_fp();
-                const std::array<amrex::MultiFab*, 3>& pml_E = pml[lev]->GetE_fp();
+                const std::array<amrex::MultiFab*, 3>& pml_B = m_fields.get_alldirs("pml_B_fp", lev);
+                const std::array<amrex::MultiFab*, 3>& pml_E = m_fields.get_alldirs("pml_E_fp", lev);
                 shiftMF(*pml_B[dim], geom[lev], num_shift, dir, lev, dont_update_cost);
                 shiftMF(*pml_E[dim], geom[lev], num_shift, dir, lev, dont_update_cost);
             }
@@ -279,6 +277,8 @@ WarpX::MoveWindow (const int step, bool move_j)
                 shiftMF(*Bfield_aux[lev][dim], geom[lev], num_shift, dir, lev, do_update_cost);
                 shiftMF(*Efield_aux[lev][dim], geom[lev], num_shift, dir, lev, do_update_cost);
                 if (fft_do_time_averaging) {
+                    ablastr::fields::MultiLevelVectorField Efield_avg_cp = m_fields.get_mr_levels_alldirs("Efield_avg_cp", finest_level);
+                    ablastr::fields::MultiLevelVectorField Bfield_avg_cp = m_fields.get_mr_levels_alldirs("Bfield_avg_cp", finest_level);
                     shiftMF(*Bfield_avg_cp[lev][dim], geom[lev-1], num_shift_crse, dir, lev, do_update_cost,
                         m_p_ext_field_params->B_external_grid[dim], use_Bparser, Bfield_parser);
                     shiftMF(*Efield_avg_cp[lev][dim], geom[lev-1], num_shift_crse, dir, lev, do_update_cost,
@@ -288,8 +288,8 @@ WarpX::MoveWindow (const int step, bool move_j)
                     shiftMF(*m_fields.get("current_cp", Direction{dim}, lev), geom[lev-1], num_shift_crse, dir, lev, do_update_cost);
                 }
                 if (do_pml && pml[lev]->ok()) {
-                    const std::array<amrex::MultiFab*, 3>& pml_B = pml[lev]->GetB_cp();
-                    const std::array<amrex::MultiFab*, 3>& pml_E = pml[lev]->GetE_cp();
+                    const std::array<amrex::MultiFab*, 3>& pml_B = m_fields.get_alldirs("pml_B_cp", lev);
+                    const std::array<amrex::MultiFab*, 3>& pml_E = m_fields.get_alldirs("pml_E_cp", lev);
                     shiftMF(*pml_B[dim], geom[lev-1], num_shift_crse, dir, lev, dont_update_cost);
                     shiftMF(*pml_E[dim], geom[lev-1], num_shift_crse, dir, lev, dont_update_cost);
                 }
@@ -315,7 +315,7 @@ WarpX::MoveWindow (const int step, bool move_j)
             // Fine grid
             if (do_pml && pml[lev]->ok())
             {
-                amrex::MultiFab* pml_F = pml[lev]->GetF_fp();
+                amrex::MultiFab* pml_F = m_fields.get("pml_F_fp", lev);
                 shiftMF(*pml_F, geom[lev], num_shift, dir, lev, dont_update_cost);
             }
             if (lev > 0)
@@ -323,7 +323,7 @@ WarpX::MoveWindow (const int step, bool move_j)
                 // Coarse grid
                 if (do_pml && pml[lev]->ok())
                 {
-                    amrex::MultiFab* pml_F = pml[lev]->GetF_cp();
+                    amrex::MultiFab* pml_F = m_fields.get("pml_F_cp", lev);
                     shiftMF(*pml_F, geom[lev-1], num_shift_crse, dir, lev, dont_update_cost);
                 }
             }
@@ -348,7 +348,7 @@ WarpX::MoveWindow (const int step, bool move_j)
             // Fine grid
             if (do_pml && pml[lev]->ok())
             {
-                amrex::MultiFab* pml_G = pml[lev]->GetG_fp();
+                amrex::MultiFab* pml_G = m_fields.get("pml_G_fp", lev);
                 shiftMF(*pml_G, geom[lev], num_shift, dir, lev, dont_update_cost);
             }
             if (lev > 0)
@@ -356,7 +356,7 @@ WarpX::MoveWindow (const int step, bool move_j)
                 // Coarse grid
                 if (do_pml && pml[lev]->ok())
                 {
-                    amrex::MultiFab* pml_G = pml[lev]->GetG_cp();
+                    amrex::MultiFab* pml_G = m_fields.get("pml_G_cp", lev);
                     shiftMF(*pml_G, geom[lev-1], num_shift_crse, dir, lev, dont_update_cost);
                 }
             }

@@ -23,7 +23,7 @@ namespace ablastr::fields
         int ncomp,
         amrex::IntVect const & ngrow,
         std::optional<const amrex::Real> initial_value,
-        bool redistribute,
+        bool remake,
         bool redistribute_on_remake
     )
     {
@@ -44,7 +44,7 @@ namespace ablastr::fields
                     {ba, dm, ncomp, ngrow, tag},
                     std::nullopt,  // scalar: no direction
                     level,
-                    redistribute,
+                    remake,
                     redistribute_on_remake,
                     ""   // we own the memory
                 }
@@ -75,7 +75,7 @@ namespace ablastr::fields
         int ncomp,
         amrex::IntVect const & ngrow,
         std::optional<const amrex::Real> initial_value,
-        bool redistribute,
+        bool remake,
         bool redistribute_on_remake
     )
     {
@@ -100,7 +100,7 @@ namespace ablastr::fields
                     {ba, dm, ncomp, ngrow, tag},
                     dir,
                     level,
-                    redistribute,
+                    remake,
                     redistribute_on_remake,
                     ""   // we own the memory
                 }
@@ -174,7 +174,7 @@ namespace ablastr::fields
                     {mf_alias, amrex::make_alias, 0, mf_alias.nComp()},
                     std::nullopt,  // scalar: no direction
                     level,
-                    alias.m_redistribute,
+                    alias.m_remake,
                     alias.m_redistribute_on_remake,
                     alias_name
                 }
@@ -235,7 +235,7 @@ namespace ablastr::fields
                     {mf_alias, amrex::make_alias, 0, mf_alias.nComp()},
                     dir,
                     level,
-                    alias.m_redistribute,
+                    alias.m_remake,
                     alias.m_redistribute_on_remake,
                     alias_name
                 }
@@ -266,6 +266,13 @@ namespace ablastr::fields
         for (auto & element : m_mf_register )
         {
             MultiFabOwner & mf_owner = element.second;
+
+            // keep distribution map as it is?
+            if (!mf_owner.m_remake) {
+                continue;
+            }
+
+            // remake MultiFab with new distribution map
             if (mf_owner.m_level == level && !mf_owner.is_alias()) {
                 amrex::MultiFab & mf = mf_owner.m_mf;
                 amrex::IntVect const & ng = mf.nGrowVect();
@@ -287,8 +294,14 @@ namespace ablastr::fields
         for (auto & element : m_mf_register )
         {
             MultiFabOwner & mf_owner = element.second;
+
+            // keep distribution map as it is?
+            if (!mf_owner.m_remake) {
+                continue;
+            }
+
             if (mf_owner.m_level == level && mf_owner.is_alias()) {
-                amrex::MultiFab & mf = mf_owner.m_mf;
+                amrex::MultiFab & mf = m_mf_register[mf_owner.m_owner].m_mf;
                 amrex::MultiFab new_mf(mf, amrex::make_alias, 0, mf.nComp());
 
                 // no copy via Redistribute: the owner was already redistributed
@@ -329,6 +342,7 @@ namespace ablastr::fields
     {
         if (m_mf_register.count(key) == 0) {
             // FIXME: temporary, throw a std::runtime_error
+            // throw std::runtime_error("MultiFabRegister::get name does not exist in register: " + key);
             return nullptr;
         }
         amrex::MultiFab & mf = m_mf_register.at(key).m_mf;
@@ -343,6 +357,7 @@ namespace ablastr::fields
     {
         if (m_mf_register.count(key) == 0) {
             // FIXME: temporary, throw a std::runtime_error
+            // throw std::runtime_error("MultiFabRegister::get name does not exist in register: " + key);
             return nullptr;
         }
         amrex::MultiFab const & mf = m_mf_register.at(key).m_mf;

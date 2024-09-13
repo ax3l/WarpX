@@ -743,7 +743,7 @@ WarpX::PushPSATD ()
             PSATDBackwardTransformJ(current_fp, current_cp);
 
             // Synchronize J and rho
-            SyncCurrent(current_fp, current_cp, current_buf);
+            SyncCurrent("current_fp");
             SyncRho();
         }
         else if (current_deposition_algo == CurrentDepositionAlgo::Vay)
@@ -818,7 +818,7 @@ WarpX::PushPSATD ()
     {
         if (pml[lev] && pml[lev]->ok())
         {
-            pml[lev]->PushPSATD(lev);
+            pml[lev]->PushPSATD(m_fields, lev);
         }
         ApplyEfieldBoundary(lev, PatchType::fine);
         if (lev > 0) { ApplyEfieldBoundary(lev, PatchType::coarse); }
@@ -855,33 +855,25 @@ WarpX::EvolveB (int lev, PatchType patch_type, amrex::Real a_dt, DtType a_dt_typ
 {
     // Evolve B field in regular cells
     if (patch_type == PatchType::fine) {
-        m_fdtd_solver_fp[lev]->EvolveB( m_fields.get_alldirs("Bfield_fp",lev),
-                                        m_fields.get_alldirs("Efield_fp",lev),
-                                        m_fields.get("G_fp", lev),
-                                        m_fields.get_alldirs("face_areas", lev),
-                                        m_fields.get_alldirs("area_mod", lev),
-                                        m_fields.get_alldirs("ECTRhofield", lev),
-                                        m_fields.get_alldirs("Venl", lev),
-                                        m_flag_info_face[lev], m_borrowing[lev], lev, a_dt );
+        m_fdtd_solver_fp[lev]->EvolveB( m_fields,
+                                        lev,
+                                        patch_type,
+                                        m_flag_info_face[lev], m_borrowing[lev], a_dt );
     } else {
-        m_fdtd_solver_cp[lev]->EvolveB( m_fields.get_alldirs("Bfield_cp",lev),
-                                        m_fields.get_alldirs("Efield_cp",lev),
-                                        m_fields.get("G_fp", lev),
-                                        m_fields.get_alldirs("face_areas", lev),
-                                        m_fields.get_alldirs("area_mod", lev),
-                                        m_fields.get_alldirs("ECTRhofield", lev),
-                                        m_fields.get_alldirs("Venl", lev),
-                                        m_flag_info_face[lev], m_borrowing[lev], lev, a_dt );
+        m_fdtd_solver_cp[lev]->EvolveB( m_fields,
+                                        lev,
+                                        patch_type,
+                                        m_flag_info_face[lev], m_borrowing[lev], a_dt );
     }
 
     // Evolve B field in PML cells
     if (do_pml && pml[lev]->ok()) {
         if (patch_type == PatchType::fine) {
             m_fdtd_solver_fp[lev]->EvolveBPML(
-                pml[lev]->GetB_fp(), pml[lev]->GetE_fp(), a_dt, WarpX::do_dive_cleaning);
+                m_fields, patch_type, lev, a_dt, WarpX::do_dive_cleaning);
         } else {
             m_fdtd_solver_cp[lev]->EvolveBPML(
-                pml[lev]->GetB_cp(), pml[lev]->GetE_cp(), a_dt, WarpX::do_dive_cleaning);
+                m_fields, patch_type, lev, a_dt, WarpX::do_dive_cleaning);
         }
     }
 
@@ -917,37 +909,33 @@ WarpX::EvolveE (int lev, PatchType patch_type, amrex::Real a_dt)
 {
     // Evolve E field in regular cells
     if (patch_type == PatchType::fine) {
-        m_fdtd_solver_fp[lev]->EvolveE( m_fields.get_alldirs("Efield_fp",lev),
-                                        m_fields.get_alldirs("Bfield_fp", lev),
-                                        m_fields.get_alldirs("current_fp", lev),
-                                        m_fields.get_alldirs("edge_lengths", lev),
-                                        m_fields.get_alldirs("face_areas", lev),
-                                        m_fields.get_alldirs("ECTRhofield", lev),
-                                        m_fields.get("F_fp", lev), lev, a_dt );
+        m_fdtd_solver_fp[lev]->EvolveE( m_fields,
+                                        lev,
+                                        patch_type,
+                                        m_fields.get_alldirs("Efield_fp",lev),
+                                        a_dt );
     } else {
-        m_fdtd_solver_cp[lev]->EvolveE( m_fields.get_alldirs("Efield_cp",lev),
-                                        m_fields.get_alldirs("Bfield_cp", lev),
-                                        m_fields.get_alldirs("current_cp", lev),
-                                        m_fields.get_alldirs("edge_lengths", lev),
-                                        m_fields.get_alldirs("face_areas", lev),
-                                        m_fields.get_alldirs("ECTRhofield", lev),
-                                        m_fields.get("F_cp", lev), lev, a_dt );
+        m_fdtd_solver_cp[lev]->EvolveE( m_fields,
+                                        lev,
+                                        patch_type,
+                                        m_fields.get_alldirs("Efield_cp",lev),
+                                        a_dt );
     }
 
     // Evolve E field in PML cells
     if (do_pml && pml[lev]->ok()) {
         if (patch_type == PatchType::fine) {
             m_fdtd_solver_fp[lev]->EvolveEPML(
-                pml[lev]->GetE_fp(), pml[lev]->GetB_fp(),
-                pml[lev]->Getj_fp(), pml[lev]->Get_edge_lengths(),
-                pml[lev]->GetF_fp(),
+                m_fields,
+                patch_type,
+                lev,
                 pml[lev]->GetMultiSigmaBox_fp(),
                 a_dt, pml_has_particles );
         } else {
             m_fdtd_solver_cp[lev]->EvolveEPML(
-                pml[lev]->GetE_cp(), pml[lev]->GetB_cp(),
-                pml[lev]->Getj_cp(), pml[lev]->Get_edge_lengths(),
-                pml[lev]->GetF_cp(),
+                m_fields,
+                patch_type,
+                lev,
                 pml[lev]->GetMultiSigmaBox_cp(),
                 a_dt, pml_has_particles );
         }
@@ -1021,10 +1009,14 @@ WarpX::EvolveF (int lev, PatchType patch_type, amrex::Real a_dt, DtType a_dt_typ
     if (do_pml && pml[lev]->ok()) {
         if (patch_type == PatchType::fine) {
             m_fdtd_solver_fp[lev]->EvolveFPML(
-                pml[lev]->GetF_fp(), pml[lev]->GetE_fp(), a_dt );
+                m_fields.get("F_fp", lev),
+                m_fields.get_alldirs("Efield_fp", lev),
+                a_dt );
         } else {
             m_fdtd_solver_cp[lev]->EvolveFPML(
-                pml[lev]->GetF_cp(), pml[lev]->GetE_cp(), a_dt );
+                m_fields.get("F_cp", lev),
+                m_fields.get_alldirs("Efield_cp", lev),
+                a_dt );
         }
     }
 }
@@ -1119,16 +1111,16 @@ WarpX::MacroscopicEvolveE (int lev, PatchType patch_type, amrex::Real a_dt) {
     if (do_pml && pml[lev]->ok()) {
         if (patch_type == PatchType::fine) {
             m_fdtd_solver_fp[lev]->EvolveEPML(
-                pml[lev]->GetE_fp(), pml[lev]->GetB_fp(),
-                pml[lev]->Getj_fp(), pml[lev]->Get_edge_lengths(),
-                pml[lev]->GetF_fp(),
+                m_fields,
+                patch_type,
+                lev,
                 pml[lev]->GetMultiSigmaBox_fp(),
                 a_dt, pml_has_particles );
         } else {
             m_fdtd_solver_cp[lev]->EvolveEPML(
-                pml[lev]->GetE_cp(), pml[lev]->GetB_cp(),
-                pml[lev]->Getj_cp(), pml[lev]->Get_edge_lengths(),
-                pml[lev]->GetF_cp(),
+                m_fields,
+                patch_type,
+                lev,
                 pml[lev]->GetMultiSigmaBox_cp(),
                 a_dt, pml_has_particles );
         }

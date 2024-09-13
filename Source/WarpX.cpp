@@ -2347,22 +2347,6 @@ WarpX::AllocLevelMFs (int lev, const BoxArray& ba, const DistributionMapping& dm
                     dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
             }
             if (WarpX::electromagnetic_solver_id == ElectromagneticSolverAlgo::ECT) {
-                //! EB: Lengths of the mesh edges
-                m_fields.alloc_init( "edge_lengths", Direction{0}, lev, amrex::convert(ba, Ex_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-                m_fields.alloc_init( "edge_lengths", Direction{1}, lev, amrex::convert(ba, Ey_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-                m_fields.alloc_init( "edge_lengths", Direction{2}, lev, amrex::convert(ba, Ez_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-
-                //! EB: Areas of the mesh faces
-                m_fields.alloc_init( "face_areas", Direction{0}, lev, amrex::convert(ba, Bx_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-                m_fields.alloc_init( "face_areas", Direction{1}, lev, amrex::convert(ba, By_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-                m_fields.alloc_init( "face_areas", Direction{2}, lev, amrex::convert(ba, Bz_nodal_flag),
-                    dm, ncomps, guard_cells.ng_FieldSolver, 0.0_rt);
-
                 AllocInitMultiFab(m_flag_info_face[lev][0], amrex::convert(ba, Bx_nodal_flag), dm, ncomps,
                                   guard_cells.ng_FieldSolver, lev, "m_flag_info_face[x]");
                 AllocInitMultiFab(m_flag_info_face[lev][1], amrex::convert(ba, By_nodal_flag), dm, ncomps,
@@ -3430,40 +3414,6 @@ WarpX::AliasInitMultiFab (
     multifab_map[name_with_suffix] = mf.get();
 }
 
-amrex::MultiFab*
-WarpX::getFieldPointerUnchecked (const FieldType field_type, const int lev, const int direction) const
-{
-    // This function does *not* check if the returned field pointer is != nullptr
-
-    amrex::MultiFab* field_pointer = nullptr;
-
-    amrex::ignore_unused(lev, direction);
-
-    switch(field_type)
-    {
-        default:
-            WARPX_ABORT_WITH_MESSAGE("Invalid field type");
-            break;
-    }
-
-    return field_pointer;
-}
-
-amrex::MultiFab*
-WarpX::getFieldPointer (const FieldType field_type, const int lev, const int direction) const
-{
-    auto* const field_pointer = getFieldPointerUnchecked(field_type, lev, direction);
-    WARPX_ALWAYS_ASSERT_WITH_MESSAGE(
-        field_pointer != nullptr, "Requested field is not initialized!");
-    return field_pointer;
-}
-
-const amrex::MultiFab&
-WarpX::getField(FieldType field_type, const int lev, const int direction) const
-{
-    return *getFieldPointer(field_type, lev, direction);
-}
-
 amrex::DistributionMapping
 WarpX::MakeDistributionMap (int lev, amrex::BoxArray const& ba)
 {
@@ -3491,7 +3441,7 @@ WarpX::MakeDistributionMap (int lev, amrex::BoxArray const& ba)
 }
 
 const amrex::iMultiFab*
-WarpX::getFieldDotMaskPointer ( FieldType field_type, int lev, int dir )
+WarpX::getFieldDotMaskPointer ( FieldType field_type, int lev, int dir ) const
 {
     switch(field_type)
     {
@@ -3514,13 +3464,13 @@ WarpX::getFieldDotMaskPointer ( FieldType field_type, int lev, int dir )
 }
 
 void WarpX::SetDotMask( std::unique_ptr<amrex::iMultiFab>& field_dotMask,
-                        std::string field_name, int lev, int dir )
+                        std::string field_name, int lev, int dir ) const
 {
     // Define the dot mask for this field_type needed to properly compute dotProduct()
     // for field values that have shared locations on different MPI ranks
     if (field_dotMask != nullptr) { return; }
 
-    ablastr::fields::VectorField const& this_field = m_fields.get_alldirs(field_name,lev);
+    ablastr::fields::ConstVectorField const& this_field = m_fields.get_alldirs(field_name,lev);
     const amrex::BoxArray& this_ba = this_field[dir]->boxArray();
     const amrex::MultiFab tmp( this_ba, this_field[dir]->DistributionMap(),
                                1, 0, amrex::MFInfo().SetAlloc(false) );
